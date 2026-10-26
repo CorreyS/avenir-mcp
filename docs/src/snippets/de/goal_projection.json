@@ -1,0 +1,32 @@
+{
+  "message": "At 200.00 a month, the average of the last 3 complete months, Urlaub would reach 2000.00 in 2027-03, 6 months from now (1200.00 still to go). To reach it by 2027-03: 171.43 a month over 7 months; the current pace gets there in time.",
+  "category_id": "cat-holidays",
+  "name": "Urlaub",
+  "group": "Sparziele",
+  "target": "no target",
+  "goal_amount": 2000.0,
+  "goal_source": "given",
+  "target_month": "2027-03",
+  "target_month_source": "given",
+  "available": 800.0,
+  "missing": 1200.0,
+  "months": [
+    "2026-06",
+    "2026-07",
+    "2026-08"
+  ],
+  "assigned": 200.0,
+  "activity": 0.0,
+  "contribution": 200.0,
+  "reached_month": "2027-03",
+  "months_to_goal": 6,
+  "monthly_needed": 171.43,
+  "on_track": true,
+  "notes": [
+    "contribution is the average, over the months listed, of what was assigned to the category plus its activity (spending negative, refunds positive): what its balance actually grew by. Assigned alone would ignore what is spent out of the category and promise too early a date; both are given apart.",
+    "The projection starts from what the category holds today and adds contribution for each month after this one: what is still to be assigned this month counts as next month's.",
+    "monthly_needed spreads what is missing evenly over the months from this one to target_month, both included, as YNAB counts a target by date.",
+    "The past is no promise: a raise, a large purchase out of the category or a month assigned twice changes the pace.",
+    "… 1 more"
+  ]
+}

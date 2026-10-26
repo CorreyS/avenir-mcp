@@ -11,6 +11,8 @@ import recurring from '@snippets/recurring_charges.json?raw';
 import networth from '@snippets/net_worth.json?raw';
 import runway from '@snippets/runway.json?raw';
 import debtPayoff from '@snippets/debt_payoff.json?raw';
+import pace from '@snippets/category_pace.json?raw';
+import goal from '@snippets/goal_projection.json?raw';
 
 **Goal:** know whether the money lasts, and when it would run out, before it does.
 
@@ -131,6 +133,42 @@ runway on those alone: here the bills and everyday spending. The demo budget hol
 transactions since June only, so the average is over three months, and a note says so.
 
 <Code code={runway} lang="json" title="get_runway" />
+
+## Which categories will run out this month?
+
+Ask *"which categories will I overspend this month?"* or *"at this pace, how much will
+Groceries need?"*: `get_category_pace` projects each category's spending to the end of the
+month in progress. It does not spread the month evenly: each category follows its own
+rhythm, learnt from the last complete months, the share of a month's spending it usually
+has done by today. Rent paid on the 3rd is all spent by the 25th; groceries bought every
+week are not. What is spent so far, divided by that share, gives the month's spending
+(`history_share`). Early in the month, when that share is small, what the rest of the
+month usually holds is added instead (`history_rest`); a category with less than three
+months of history is scaled by the days elapsed (`linear`). What YNAB has scheduled for the
+rest of the month is a floor (`scheduled`).
+
+The categories likely to end the month below zero come first, with what they would be
+short of. Here, on 25 September, Restaurants is already 22.50 over, and its history says
+nothing more usually comes after the 24th; the bills are paid. Name `categories` or
+`groups` to ask about some of them only.
+
+<Code code={pace} lang="json" title="get_category_pace (excerpt)" />
+
+## When will a category reach its goal?
+
+Ask *"when will Holidays reach 2,000?"* or *"how much a month to get there by March?"*:
+`get_goal_projection` takes the pace at which the category's balance grew over the last
+complete months, what was assigned to it less what was spent out of it, and adds it each
+month to what the category holds today. It gives the month the goal is reached, or `null`
+when the pace never gets there; with `target_month`, what each month needs from this one
+on, and whether the pace is enough. Without `goal_amount`, the category's YNAB target is
+used, with its date, when it is a balance to reach.
+
+Here the household has put 200 a month into Holidays since June: from the 800 it holds
+today, 2,000 is reached in March 2027, and 171.43 a month would be enough to get there by
+then.
+
+<Code code={goal} lang="json" title="get_goal_projection" />
 
 ## Then budget next month
 

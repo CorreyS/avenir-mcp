@@ -17,7 +17,9 @@ avenir-mcp stellt diese Tools bereit. Lesende Tools sind immer verfügbar; schre
 | [`get_age_of_money`](/avenir-mcp/de/reference/tools/get-age-of-money/) | YNAB's Age of Money: how old the money spent is today, and its trend month by month. |
 | [`get_budget_vs_actual`](/avenir-mcp/de/reference/tools/get-budget-vs-actual/) | Share of each category's budget spent in a month, to see what is over or close. |
 | [`get_category_balances`](/avenir-mcp/de/reference/tools/get-category-balances/) | Budgeted, spent (activity) and available (balance) per category for a month. |
+| [`get_category_pace`](/avenir-mcp/de/reference/tools/get-category-pace/) | Where each category's spending is heading by the end of the month in progress. |
 | [`get_debt_payoff_plan`](/avenir-mcp/de/reference/tools/get-debt-payoff-plan/) | When the debts would be paid off, highest rate first (avalanche) or smallest first. |
+| [`get_goal_projection`](/avenir-mcp/de/reference/tools/get-goal-projection/) | When a category reaches an amount at its usual pace, and what a month needs to by a date. |
 | [`get_monthly_summary`](/avenir-mcp/de/reference/tools/get-monthly-summary/) | A month at a glance: income, budgeted, spent, Ready to Assign, overspent categories. |
 | [`get_net_worth_trend`](/avenir-mcp/de/reference/tools/get-net-worth-trend/) | Assets, debts and net worth at the end of each month, to see debts go down. |
 | [`get_runway`](/avenir-mcp/de/reference/tools/get-runway/) | How many months the money available would last without income, at the usual spending. |

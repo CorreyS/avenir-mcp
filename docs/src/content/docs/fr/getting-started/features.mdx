@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside } from '@astrojs/starlight/components';
 
-avenir-mcp donne à un agent 33 outils, 4 ressources et 4 prompts sur vos plans YNAB. Cette
+avenir-mcp donne à un agent 35 outils, 4 ressources et 4 prompts sur vos plans YNAB. Cette
 page les classe selon ce que vous voulez faire. Chaque ligne donne une phrase à dire à
 l'agent ; c'est lui qui choisit l'outil.
 
@@ -96,6 +96,8 @@ plus). Guides : [Rapprocher un compte](/avenir-mcp/fr/guides/reconcile/),
 | *« Est-ce que je rembourse mes dettes ? »* | [`get_net_worth_trend`](/avenir-mcp/fr/reference/tools/get-net-worth-trend/) — actifs, dettes et patrimoine net à chaque fin de mois, comptes de suivi compris | L |
 | *« Si je perdais mes revenus, combien de temps tiendrais-je ? »* | [`get_runway`](/avenir-mcp/fr/reference/tools/get-runway/) — les mois que l'argent du budget couvrirait aux dépenses habituelles, l'essentiel à part | L |
 | *« Quand mes dettes seront-elles remboursées si j'y mets 500 par mois ? »* | [`get_debt_payoff_plan`](/avenir-mcp/fr/reference/tools/get-debt-payoff-plan/) — avalanche ou boule de neige, le mois où chaque dette est soldée et les intérêts de chaque ordre | L |
+| *« Quelles catégories vais-je dépasser ce mois-ci ? »* | [`get_category_pace`](/avenir-mcp/fr/reference/tools/get-category-pace/) — les dépenses de chaque catégorie projetées à la fin du mois selon son propre rythme, celles qui risquent d'être à court d'abord | L |
+| *« Quand Vacances atteindra-t-elle 2 000 ? »* | [`get_goal_projection`](/avenir-mcp/fr/reference/tools/get-goal-projection/) — le mois où une catégorie atteint un montant à son rythme habituel, et ce qu'il faut par mois pour l'atteindre à une date | L |
 | *« Mets 150 dans Restaurants pour septembre. »* | [`set_category_budget`](/avenir-mcp/fr/reference/tools/set-category-budget/) | É ↺ |
 | *« Déplace 30 de Tennis vers Restaurants. »* | [`move_money`](/avenir-mcp/fr/reference/tools/move-money/) — les deux catégories en une confirmation | É ↺ |
 

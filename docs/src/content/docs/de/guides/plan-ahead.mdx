@@ -11,6 +11,8 @@ import recurring from '@snippets/de/recurring_charges.json?raw';
 import networth from '@snippets/de/net_worth.json?raw';
 import runway from '@snippets/de/runway.json?raw';
 import debtPayoff from '@snippets/de/debt_payoff.json?raw';
+import pace from '@snippets/de/category_pace.json?raw';
+import goal from '@snippets/de/goal_projection.json?raw';
 
 **Ziel:** wissen, ob das Geld reicht und wann es ausgehen würde, bevor es so weit ist.
 
@@ -135,6 +137,44 @@ Demo-Budget hat erst seit Juni Buchungen: Der Durchschnitt geht über drei Monat
 ein Hinweis sagt es.
 
 <Code code={runway} lang="json" title="get_runway" />
+
+## Welche Kategorien reichen diesen Monat nicht?
+
+Fragen Sie *„welche Kategorien überziehe ich diesen Monat?“* oder *„wie viel brauchen die
+Lebensmittel bei diesem Tempo?“*: `get_category_pace` schreibt die Ausgaben jeder Kategorie
+bis zum Ende des laufenden Monats fort. Es verteilt den Monat nicht gleichmäßig: Jede
+Kategorie folgt ihrem eigenen Rhythmus, gelernt aus den letzten vollständigen Monaten, dem
+Anteil der Monatsausgaben, den sie bis zu diesem Tag gewöhnlich erreicht hat. Die am 3.
+gezahlte Miete ist am 25. ganz ausgegeben; der wöchentliche Einkauf nicht. Das bisher
+Ausgegebene, geteilt durch diesen Anteil, ergibt die Ausgaben des Monats (`history_share`).
+Am Monatsanfang, wenn dieser Anteil klein ist, wird stattdessen addiert, was der Rest des
+Monats gewöhnlich bringt (`history_rest`); eine Kategorie mit weniger als drei Monaten
+Verlauf folgt den vergangenen Tagen (`linear`). Was YNAB für den Rest des Monats geplant
+hat, ist eine Untergrenze (`scheduled`).
+
+Die Kategorien, die den Monat wahrscheinlich unter null beenden, kommen zuerst, mit dem,
+was ihnen fehlen würde. Hier, am 25. September, liegen die Restaurants schon 22,50 darüber,
+und ihr Verlauf sagt, dass nach dem 24. gewöhnlich nichts mehr kommt; die Fixkosten sind
+bezahlt. Nennen Sie `categories` oder `groups`, um nur nach einigen zu fragen.
+
+<Code code={pace} lang="json" title="get_category_pace (Auszug)" />
+
+## Wann erreicht eine Kategorie ihr Ziel?
+
+Fragen Sie *„wann erreicht Urlaub 2.000?“* oder *„wie viel im Monat, um bis März dort zu
+sein?“*: `get_goal_projection` nimmt das Tempo, mit dem der Saldo der Kategorie in den
+letzten vollständigen Monaten gewachsen ist, was ihr zugewiesen wurde minus was aus ihr
+ausgegeben wurde, und addiert es jeden Monat zu dem, was die Kategorie heute enthält. Es
+nennt den Monat, in dem das Ziel erreicht ist, oder `null`, wenn das Tempo nie dorthin
+führt; mit `target_month`, was jeder Monat ab diesem braucht, und ob das Tempo reicht. Ohne
+`goal_amount` wird das YNAB-Ziel der Kategorie mit seinem Datum genommen, wenn es ein zu
+erreichender Saldo ist.
+
+Hier legt der Haushalt seit Juni 200 im Monat in Urlaub: Von den 800, die die Kategorie
+heute enthält, sind 2.000 im März 2027 erreicht, und 171,43 im Monat würden reichen, um
+bis dahin dort zu sein.
+
+<Code code={goal} lang="json" title="get_goal_projection" />
 
 ## Dann den nächsten Monat budgetieren
 

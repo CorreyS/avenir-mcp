@@ -39,3 +39,53 @@ def scheduled(
     }
     item.update(extra)
     return item
+
+
+def month_category(
+    key: str, budgeted: int, available: int, group: str = "Everyday", **extra: Any
+) -> dict[str, Any]:
+    """A category of a month as YNAB returns it, named after its key, nothing hidden.
+
+    Args:
+        key: Its name in lower case; its id is cat-<key>.
+        budgeted: Milliunits assigned this month.
+        available: Milliunits available; the activity is what makes up the difference.
+        group: The name of its group, whose id is grp-<name in lower case>.
+        **extra: Fields to change, e.g. hidden or a target's.
+
+    Returns:
+        The category.
+    """
+    return {
+        "id": f"cat-{key}",
+        "name": key.title(),
+        "category_group_id": f"grp-{group.lower()}",
+        "category_group_name": group,
+        "hidden": False,
+        "deleted": False,
+        "budgeted": budgeted,
+        "activity": available - budgeted,
+        "balance": available,
+    } | extra
+
+
+def transaction(day: str, amount: int, category: str | None, **extra: Any) -> dict[str, Any]:
+    """A transaction on a budget account as YNAB returns it, not split.
+
+    Args:
+        day: Its date, YYYY-MM-DD.
+        amount: Milliunits, negative for money out.
+        category: Its category id, or None.
+        **extra: Fields to change, e.g. subtransactions or deleted.
+
+    Returns:
+        The transaction.
+    """
+    return {
+        "date": day,
+        "amount": amount,
+        "category_id": category,
+        "transfer_account_id": None,
+        "deleted": False,
+        "subtransactions": [],
+    } | extra

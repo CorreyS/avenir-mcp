@@ -1,0 +1,85 @@
+{
+  "message": "Day 25 of 30 of 2026-09: 1 category is likely to run out by the end of the month, 22.50 short in all: Restaurants (22.50 short).",
+  "month": "2026-09-01",
+  "day": 25,
+  "days_in_month": 30,
+  "months": [
+    "2026-03",
+    "2026-04",
+    "2026-05",
+    "2026-06",
+    "… 2 more"
+  ],
+  "categories": [
+    {
+      "category_id": "cat-restaurants",
+      "name": "Restaurants",
+      "group": "Everyday",
+      "budgeted": 120.0,
+      "available": -22.5,
+      "spent": -166.5,
+      "scheduled": 0.0,
+      "projected_spent": -166.5,
+      "projected_available": -22.5,
+      "likely_over": true,
+      "shortfall": 22.5,
+      "method": "history_share",
+      "typical_share": 1.0
+    },
+    {
+      "category_id": "cat-rent",
+      "name": "Rent",
+      "group": "Bills",
+      "budgeted": 950.0,
+      "available": 0.0,
+      "spent": -950.0,
+      "scheduled": 0.0,
+      "projected_spent": -950.0,
+      "projected_available": 0.0,
+      "likely_over": false,
+      "shortfall": 0.0,
+      "method": "history_share",
+      "typical_share": 1.0
+    },
+    {
+      "category_id": "cat-power",
+      "name": "Electricity",
+      "group": "Bills",
+      "budgeted": 64.2,
+      "available": 0.0,
+      "spent": -64.2,
+      "scheduled": 0.0,
+      "projected_spent": -64.2,
+      "projected_available": 0.0,
+      "likely_over": false,
+      "shortfall": 0.0,
+      "method": "history_share",
+      "typical_share": 1.0
+    },
+    {
+      "category_id": "cat-internet",
+      "name": "Internet",
+      "group": "Bills",
+      "budgeted": 29.99,
+      "available": 0.0,
+      "spent": -29.99,
+      "scheduled": 0.0,
+      "projected_spent": -29.99,
+      "projected_available": 0.0,
+      "likely_over": false,
+      "shortfall": 0.0,
+      "method": "history_share",
+      "typical_share": 1.0
+    },
+    "… 8 more"
+  ],
+  "more": 0,
+  "likely_over": 1,
+  "shortfall": 22.5,
+  "notes": [
+    "spent is the money out of each category so far this month; refunds and other money in are not deducted from it, but are in available, which is YNAB's figure.",
+    "Each category follows its own rhythm: typical_share is the share of a month's spending it usually has done by day 25, over the months listed. history_share divides what is spent by that share; history_rest, used when that share is under 25%, adds what the rest of the month usually holds instead; linear, used when fewer than 3 of the months hold spending in the category, scales what is spent by the days elapsed.",
+    "What YNAB has scheduled out of a category from today to the end of the month is a floor: when spent plus scheduled comes to more, it is the projection (method scheduled).",
+    "The pace is no promise: a large purchase early in the month makes it look faster than it is, and a bill paid late slower."
+  ]
+}

@@ -11,6 +11,8 @@ import recurring from '@snippets/es/recurring_charges.json?raw';
 import networth from '@snippets/es/net_worth.json?raw';
 import runway from '@snippets/es/runway.json?raw';
 import debtPayoff from '@snippets/es/debt_payoff.json?raw';
+import pace from '@snippets/es/category_pace.json?raw';
+import goal from '@snippets/es/goal_projection.json?raw';
 
 **Objetivo:** saber si el dinero alcanza, y cuándo se acabaría, antes de que ocurra.
 
@@ -133,6 +135,41 @@ demostración solo tiene transacciones desde junio: la media es de tres meses, y
 dice.
 
 <Code code={runway} lang="json" title="get_runway" />
+
+## ¿Qué categorías se quedarán cortas este mes?
+
+Pregunte *«¿qué categorías voy a superar este mes?»* o *«a este ritmo, ¿cuánto necesitará el
+supermercado?»*: `get_category_pace` proyecta el gasto de cada categoría hasta el final del
+mes en curso. No reparte el mes por igual: cada categoría sigue su propio ritmo, aprendido
+de los últimos meses completos, la parte del gasto del mes que suele llevar hecha a esta
+fecha. El alquiler pagado el día 3 está gastado entero el 25; la compra de cada semana no.
+Lo gastado hasta ahora, dividido entre esa parte, da el gasto del mes (`history_share`). A
+principios de mes, cuando esa parte es pequeña, se suma en su lugar lo que suele traer el
+resto del mes (`history_rest`); una categoría con menos de tres meses de historial sigue
+los días transcurridos (`linear`). Lo que YNAB tiene programado para el resto del mes es un
+mínimo (`scheduled`).
+
+Las categorías que probablemente terminen el mes por debajo de cero van primero, con lo que
+les faltaría. Aquí, el 25 de septiembre, Restaurantes ya va 22,50 por encima, y su historial
+dice que después del 24 no suele llegar nada más; las facturas están pagadas. Indique
+`categories` o `groups` para preguntar solo por algunas.
+
+<Code code={pace} lang="json" title="get_category_pace (extracto)" />
+
+## ¿Cuándo alcanzará una categoría su meta?
+
+Pregunte *«¿cuándo llegará Vacaciones a 2.000?»* o *«¿cuánto al mes para llegar en
+marzo?»*: `get_goal_projection` toma el ritmo al que creció el saldo de la categoría en los
+últimos meses completos, lo que se le asignó menos lo que se gastó de ella, y lo suma cada mes
+a lo que la categoría tiene hoy. Da el mes en que se alcanza la meta, o `null` si a ese
+ritmo no se llega nunca; con `target_month`, lo que necesita cada mes a partir de este, y si
+el ritmo basta. Sin `goal_amount`, se usa el objetivo de YNAB de la categoría, con su fecha,
+cuando es un saldo que alcanzar.
+
+Aquí el hogar pone 200 al mes en Vacaciones desde junio: de los 800 que tiene hoy, llega a
+2.000 en marzo de 2027, y 171,43 al mes bastarían para llegar en esa fecha.
+
+<Code code={goal} lang="json" title="get_goal_projection" />
 
 ## Después, presupuestar el mes siguiente
 

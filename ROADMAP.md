@@ -24,6 +24,10 @@ plan as the existing reports are:
 - `get_debt_payoff_plan`: when each debt is paid off at the current payments, and with
   an extra amount. *Done.*
 - `get_age_of_money`: how YNAB's Age of Money changed month by month. *Done.*
+- `get_category_pace`: which categories are on track to overspend by the end of the
+  month, each projected from its own rhythm of spending. *Done.*
+- `get_goal_projection`: when a category reaches an amount at its usual pace, and what a
+  month needs to reach it by a date. *Done.*
 
 ### Payees named as the user names them
 

@@ -147,6 +147,19 @@ CALLS: list[Call] = [
         {"plan_id": BUDGET, "essential_groups": ["Bills", "Everyday"]},
         keep=10,
     ),
+    # Restaurants already over on the 25th; the rent and the bills paid, groceries pending.
+    Call("category_pace", "get_category_pace", {"plan_id": BUDGET}, keep=4),
+    # The holidays at the 200 a month put aside since June, and what March 2027 would take.
+    Call(
+        "goal_projection",
+        "get_goal_projection",
+        {
+            "plan_id": BUDGET,
+            "category": "cat-holidays",
+            "goal_amount": 2000,
+            "target_month": "2027-03",
+        },
+    ),
     # The car loan, 100 a month above its payment.
     Call(
         "debt_payoff",

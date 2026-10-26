@@ -61,6 +61,8 @@ GUIDES = {
     "get_net_worth_trend": "guides/plan-ahead",
     "get_runway": "guides/plan-ahead",
     "get_debt_payoff_plan": "guides/plan-ahead",
+    "get_category_pace": "guides/plan-ahead",
+    "get_goal_projection": "guides/plan-ahead",
     "set_category_budget": "guides/categories",
     "move_money": "guides/monthly-review",
     "create_transactions": "guides/missing-transactions",

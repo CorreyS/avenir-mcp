@@ -11,6 +11,8 @@ import recurring from '@snippets/nl/recurring_charges.json?raw';
 import networth from '@snippets/nl/net_worth.json?raw';
 import runway from '@snippets/nl/runway.json?raw';
 import debtPayoff from '@snippets/nl/debt_payoff.json?raw';
+import pace from '@snippets/nl/category_pace.json?raw';
+import goal from '@snippets/nl/goal_projection.json?raw';
 
 **Doel:** weten of het geld volstaat, en wanneer het op zou raken, voordat het zover is.
 
@@ -132,6 +134,42 @@ Noem de categorieën waarvoor u de betalingen geen moment zou kunnen staken
 alleen transacties vanaf juni, dus het gemiddelde is over drie maanden berekend, en dat wordt ook vermeld in een opmerking.
 
 <Code code={runway} lang="json" title="get_runway" />
+
+## Welke categorieën komen deze maand tekort?
+
+Vraag *„welke categorieën ga ik deze maand overschrijden?”* of *„hoeveel hebben de
+boodschappen in dit tempo nodig?”*: `get_category_pace` trekt de uitgaven van elke
+categorie door tot het einde van de lopende maand. Het verdeelt de maand niet gelijk: elke
+categorie volgt haar eigen ritme, geleerd uit de laatste volledige maanden, het deel van de
+uitgaven van de maand dat ze op deze dag gewoonlijk gedaan heeft. De huur betaald op de 3e is
+op de 25e helemaal uitgegeven; de wekelijkse boodschappen niet. Wat tot nu toe is uitgegeven,
+gedeeld door dat deel, geeft de uitgaven van de maand (`history_share`). Vroeg in de maand,
+als dat deel klein is, wordt in plaats daarvan opgeteld wat de rest van de maand gewoonlijk
+brengt (`history_rest`); een categorie met minder dan drie maanden geschiedenis volgt de
+verstreken dagen (`linear`). Wat YNAB voor de rest van de maand heeft ingepland, is een
+ondergrens (`scheduled`).
+
+De categorieën die de maand waarschijnlijk onder nul eindigen, komen eerst, met wat ze
+tekort zouden komen. Hier, op 25 september, staat Restaurants al 22,50 te hoog, en de
+geschiedenis zegt dat er na de 24e gewoonlijk niets meer komt; de vaste lasten zijn betaald.
+Noem `categories` of `groups` om maar naar enkele te vragen.
+
+<Code code={pace} lang="json" title="get_category_pace (uittreksel)" />
+
+## Wanneer bereikt een categorie haar doel?
+
+Vraag *„wanneer heeft Vakantie 2.000?”* of *„hoeveel per maand om er in maart te zijn?”*:
+`get_goal_projection` neemt het tempo waarin het saldo van de categorie in de laatste
+volledige maanden groeide, wat eraan werd toegewezen min wat eruit werd uitgegeven, en telt
+het elke maand op bij wat de categorie vandaag heeft. Het geeft de maand waarin het doel is
+bereikt, of `null` als het tempo er nooit komt; met `target_month`, wat elke maand vanaf deze
+nodig heeft, en of het tempo volstaat. Zonder `goal_amount` wordt het YNAB-doel van de
+categorie genomen, met zijn datum, als het een te bereiken saldo is.
+
+Hier zet het huishouden sinds juni 200 per maand in Vakantie: van de 800 die er vandaag in
+staat, is 2.000 bereikt in maart 2027, en 171,43 per maand zou volstaan om er dan te zijn.
+
+<Code code={goal} lang="json" title="get_goal_projection" />
 
 ## Dan volgende maand budgetteren
 

@@ -77,6 +77,35 @@ class Runway(Model):
     """What the figures assume, to tell the user."""
 
 
+def by_name_or_id(
+    items: list[dict[str, Any]], wanted: list[str]
+) -> tuple[list[dict[str, Any]], list[str]]:
+    """Match what the caller named with the plan's items, by id or by name whatever the case.
+
+    Args:
+        items: The plan's groups or categories, each with its id and name.
+        wanted: Names or ids, as the caller gave them.
+
+    Returns:
+        The items named, in the order given, each once (a name two items share gives
+        both), and what matched nothing, as given.
+    """
+    by_id = {item["id"]: item for item in items}
+    found: list[dict[str, Any]] = []
+    unknown: list[str] = []
+    for given in wanted:
+        key = given.strip()
+        matches = (
+            [by_id[key]]
+            if key in by_id
+            else [i for i in items if i["name"].strip().casefold() == key.casefold()]
+        )
+        if not matches:
+            unknown.append(given)
+        found += [item for item in matches if item not in found]
+    return found, unknown
+
+
 def chosen_groups(groups: list[dict[str, Any]], wanted: list[str]) -> list[dict[str, Any]]:
     """Find the category groups the caller named, by id or by name whatever the case.
 
@@ -91,19 +120,7 @@ def chosen_groups(groups: list[dict[str, Any]], wanted: list[str]) -> list[dict[
         ValueError: If a name or id is not one of the plan's groups, with the groups
             it could be.
     """
-    by_id = {group["id"]: group for group in groups}
-    found: list[dict[str, Any]] = []
-    unknown: list[str] = []
-    for item in wanted:
-        key = item.strip()
-        matches = (
-            [by_id[key]]
-            if key in by_id
-            else [g for g in groups if g["name"].strip().casefold() == key.casefold()]
-        )
-        if not matches:
-            unknown.append(item)
-        found += [group for group in matches if group not in found]
+    found, unknown = by_name_or_id(groups, wanted)
     if unknown:
         given = ", ".join(repr(untrusted(name)) for name in unknown)
         names = ", ".join(untrusted(group["name"]) for group in groups)

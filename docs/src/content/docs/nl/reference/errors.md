@@ -33,11 +33,27 @@ Elke tool die YNAB aanroept, kan de fout van YNAB teruggeven: `Error calling too
 
 - `month must be 'current' or the first day of a month as YYYY-MM-01, got '{month}'.`
 
+## [`get_category_pace`](/avenir-mcp/nl/reference/tools/get-category-pace/)
+
+- `get_category_pace projects only the month in progress, {now}-01: use get_budget_vs_actual for a month gone by, forecast_balance for the months ahead.`
+- `month must be 'current' or the first day of a month as YYYY-MM-01, got '{month}'.`
+- `Unknown category group(s) {given}: give names or ids of this plan's groups, as list_category_groups shows them: {names}.`
+- `Unknown category(ies) {given}: give names or ids of this plan's categories, as get_category_balances shows them: {names}.`
+
 ## [`get_debt_payoff_plan`](/avenir-mcp/nl/reference/tools/get-debt-payoff-plan/)
 
 - `Unknown debt account(s) {given}: give names or ids of the open accounts that owe money: {names}.`
 - `No minimum payment is known and nothing was paid into the debt accounts over the last 3 complete months: give monthly_budget, or minimum_payment in overrides.`
 - `monthly_budget {given} is less than the minimum payments, {minimums}: give at least that much.`
+
+## [`get_goal_projection`](/avenir-mcp/nl/reference/tools/get-goal-projection/)
+
+- `'{wanted}' names {found} categories: give the id of one: {ids}.`
+- `The target of '{name}' is {category}: not a balance to reach. To project one, give goal_amount.`
+- `target_month must be the current month or later.`
+- `target_month must be at most 600 months ahead.`
+- `target_month must be a month as YYYY-MM, got '{month}'.`
+- `Unknown category(ies) {given}: give names or ids of this plan's categories, as get_category_balances shows them: {names}.`
 
 ## [`get_monthly_summary`](/avenir-mcp/nl/reference/tools/get-monthly-summary/)
 

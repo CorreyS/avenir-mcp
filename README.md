@@ -70,6 +70,7 @@ what avenir-mcp answers today.
 
 - **Understand a month** — "Which category is overspent this month?" → `get_monthly_summary`
 - **Prepare a spend** — "Will I go below zero before December?" → `forecast_balance`
+- **Stay on track** — "Which categories will I overspend this month?" → `get_category_pace`; "When will Holidays reach 2,000?" → `get_goal_projection`
 - **Pay off a debt** — "When will my debts be paid off if I put 500 a month on them?" → `get_debt_payoff_plan`
 - **Tidy the transactions** — "Categorise what is pending." → `suggest_categories`, applied after your yes
 - **Find one transaction** — "Which transaction is my 86.40 receipt from the 12th?" → `find_transactions`

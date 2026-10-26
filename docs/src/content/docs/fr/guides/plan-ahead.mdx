@@ -11,6 +11,8 @@ import recurring from '@snippets/fr/recurring_charges.json?raw';
 import networth from '@snippets/fr/net_worth.json?raw';
 import runway from '@snippets/fr/runway.json?raw';
 import debtPayoff from '@snippets/fr/debt_payoff.json?raw';
+import pace from '@snippets/fr/category_pace.json?raw';
+import goal from '@snippets/fr/goal_projection.json?raw';
 
 **Objectif :** savoir si l'argent tiendra, et quand il manquerait, avant que ça arrive.
 
@@ -134,6 +136,43 @@ budget de démonstration n'a de transactions que depuis juin : la moyenne porte 
 mois, et une note le dit.
 
 <Code code={runway} lang="json" title="get_runway" />
+
+## Quelles catégories seront à court ce mois-ci ?
+
+Demandez *« quelles catégories vais-je dépasser ce mois-ci ? »* ou *« à ce rythme, combien
+faudra-t-il pour les courses ? »* : `get_category_pace` projette les dépenses de chaque
+catégorie jusqu'à la fin du mois en cours. Il ne répartit pas le mois également : chaque
+catégorie suit son propre rythme, appris des derniers mois complets, la part des dépenses
+du mois qu'elle a d'habitude faite à cette date. Le loyer payé le 3 est entièrement dépensé
+le 25 ; les courses de chaque semaine ne le sont pas. Ce qui est dépensé jusqu'ici, divisé
+par cette part, donne les dépenses du mois (`history_share`). En début de mois, quand cette
+part est faible, ce que le reste du mois contient d'habitude est ajouté à la place
+(`history_rest`) ; une catégorie qui a moins de trois mois d'historique suit les jours
+écoulés (`linear`). Ce que YNAB a programmé pour le reste du mois est un plancher
+(`scheduled`).
+
+Les catégories qui risquent de finir le mois sous zéro viennent d'abord, avec ce qui leur
+manquerait. Ici, le 25 septembre, Restaurants est déjà dépassée de 22,50, et son historique
+dit que rien ne vient d'habitude après le 24 ; les charges fixes sont payées. Nommez
+`categories` ou `groups` pour n'en interroger que certaines.
+
+<Code code={pace} lang="json" title="get_category_pace (extrait)" />
+
+## Quand une catégorie atteindra-t-elle son objectif ?
+
+Demandez *« quand Vacances atteindra-t-elle 2 000 ? »* ou *« combien par mois pour y être en
+mars ? »* : `get_goal_projection` prend le rythme auquel le solde de la catégorie a grandi
+sur les derniers mois complets, ce qui lui a été affecté moins ce qui en a été dépensé, et
+l'ajoute chaque mois à ce que la catégorie contient aujourd'hui. Il donne le mois où
+l'objectif est atteint, ou `null` si le rythme n'y mène jamais ; avec `target_month`, ce
+qu'il faut chaque mois à partir de celui-ci, et si le rythme suffit. Sans `goal_amount`,
+l'objectif YNAB de la catégorie est pris, avec sa date, quand c'est un solde à atteindre.
+
+Ici le foyer met 200 par mois dans Vacances depuis juin : des 800 qu'elle contient
+aujourd'hui, 2 000 sont atteints en mars 2027, et 171,43 par mois suffiraient pour y être à
+cette date.
+
+<Code code={goal} lang="json" title="get_goal_projection" />
 
 ## Puis préparer le mois suivant
 
