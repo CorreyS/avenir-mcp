@@ -15,6 +15,7 @@ import pace from '@snippets/nl/category_pace.json?raw';
 import goal from '@snippets/nl/goal_projection.json?raw';
 import upcomingExpenses from '@snippets/nl/upcoming_expenses.json?raw';
 import paycheckPlan from '@snippets/nl/paycheck_plan.json?raw';
+import scenarios from '@snippets/nl/scenarios.json?raw';
 
 **Doel:** weten of het geld volstaat, en wanneer het op zou raken, voordat het zover is.
 
@@ -71,6 +72,14 @@ Details: [Prognose](/avenir-mcp/nl/concepts/forecasting/).
 - `months[].lowest`: het laagste punt binnen de maand, dag voor dag — het punt dat aangeeft
   of een betaling zou worden geweigerd.
 - `first_shortfall`: de eerste maand waarvan het laagste punt onder nul ligt, of `null`.
+- `months[].end_low`, `end_high`: een marge rond elk maandeinde, één standaardafwijking
+  van hoe ver de overige uitgaven (en de inkomsten, tenzij u die opgeeft) van de laatste 3
+  volle maanden van hun gemiddelde afweken; ze wordt maand na maand breder. In het
+  demobudget, waarvan de overige uitgaven niet schommelden, zijn ze gelijk aan `end`.
+  `band.note` zegt hoe de marge tot stand kwam, of waarom er geen is (minder dan 3 volle
+  maanden geschiedenis).
+- `band.first_possible_shortfall`: de eerste maand waarin het saldo binnen die marge onder
+  nul zou kunnen komen, of `null`.
 
 <Aside type="caution" title="Een prognose, geen voorspelling">
 Het is een voortzetting van de afgelopen maanden. Een vakantie, een jaarlijkse belastingafdracht of een eenmalige aankoop in die periode
@@ -172,6 +181,7 @@ Hier zet het huishouden sinds juni 200 per maand in Vakantie: van de 800 die er 
 staat, is 2.000 bereikt in maart 2027, en 171,43 per maand zou volstaan om er dan te zijn.
 
 <Code code={goal} lang="json" title="get_goal_projection" />
+
 ## De rekeningen die niet elke maand komen
 
 Vraag *„Welke grote rekeningen komen er dit jaar, en ben ik er klaar voor?“*:
@@ -206,6 +216,29 @@ komt het salaris op de 28e zonder dat er eerder iets vervalt, en de rekeningen v
 laten de betaalrekening op de 24e zakken tot 3.460,21, het laagste punt.
 
 <Code code={paycheckPlan} lang="json" title="get_paycheck_plan (fragment)" />
+
+## Wat als?
+
+Vraag *„wat als we 20 % minder aan restaurants uitgeven en vanaf november een autolening
+van 450 erbij komt, of als we de auto contant kopen?”*: `compare_scenarios` maakt dezelfde
+prognose als `forecast_balance`, met dezelfde argumenten, als basis, en daarna die van elk
+scenario (hooguit 4), een benoemde lijst van aanpassingen:
+
+| Aanpassing | Wat ze verandert |
+|---|---|
+| `change_spending` | de gebruikelijke maanduitgave van een categorie of groep, het gemiddelde van de laatste 3 volle maanden, met `percent` of naar `monthly_spending`, verdeeld over de dagen van elke maand |
+| `add_monthly` | een bedrag op `day` van elke maand vanaf `start` (tot `end`): een nieuwe last, of inkomen |
+| `add_one_off` | een bedrag één keer, op `date` |
+| `drop_recurring` | een terugkerende last of geplande betaling die vanaf `start` niet meer betaald wordt, gevonden via een woord van zijn `payee` |
+
+Elk scenario komt maand voor maand terug, met zijn `difference` ten opzichte van de basis,
+het verschil aan het eind, zijn laagste saldo en die maand, de eerste maand onder nul en
+hoe elke aanpassing is toegepast. Hier kosten restaurants 112,00 per maand: een vijfde
+minder laat 22,40 per maand over; met de autolening vanaf november is het saldo in december
+829,07 lager. De auto op 15 november contant kopen brengt het die maand onder nul, tot
+−1.435,53, zelfs zonder Streamflix. Vier YNAB-verzoeken, ongeacht het aantal scenario's.
+
+<Code code={scenarios} lang="json" title="compare_scenarios (fragment)" />
 
 ## Dan volgende maand budgetteren
 

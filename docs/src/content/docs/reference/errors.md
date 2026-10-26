@@ -11,6 +11,22 @@ An error comes back as a tool result with `isError`, and its message says what t
 
 Any tool that reaches YNAB can return YNAB's own error: `Error calling tool '<tool>': YNAB <status>: <detail>` — for example `YNAB 401` for a wrong or revoked token, `YNAB 429` when the 200 requests per hour are spent. A `401` answer carries avenir-mcp's own detail instead of YNAB's: `YNAB 401: the token is invalid or was revoked; create a new Personal Access Token in YNAB's settings.` When YNAB answers nothing at all, the message says whether anything may have changed: a read says that YNAB could not be reached and that nothing was changed, and a write that had already been sent says that the change may or may not be applied and has to be checked before anything is tried again. Without `YNAB_API_KEY`, the server refuses to call YNAB: `YNAB_API_KEY environment variable is not set`.
 
+## [`compare_scenarios`](/avenir-mcp/reference/tools/compare-scenarios/)
+
+- `until must be the current month or later.`
+- `until must be at most 24 months ahead.`
+- `until must be a month as YYYY-MM, got '{until}'.`
+- `Scenario names must differ: '{name}' is given twice.`
+- `end {end} comes before start {start}.`
+- `date must be after today and by the end of {until}, got {when}.`
+- `start and end must be months from {current} to {until}, got {value}.`
+- `Unknown account(s) {unknown}: use ids from list_accounts.`
+- `{kind} needs {missing}.`
+- `{kind} does not take {extra}.`
+- `change_spending needs percent or monthly_spending, not both.`
+- `No recurring charge or scheduled payment matches '{payee}': the projection's charges are {', '.join(known) or 'none'}.`
+- `Unknown category or group '{wanted}': give a name or id as get_category_balances or list_category_groups shows it.`
+
 ## [`find_transactions`](/avenir-mcp/reference/tools/find-transactions/)
 
 - `Account {0} is not in this plan: use an id from list_accounts.`
@@ -20,10 +36,10 @@ Any tool that reaches YNAB can return YNAB's own error: `Error calling tool '<to
 
 ## [`forecast_balance`](/avenir-mcp/reference/tools/forecast-balance/)
 
-- `Unknown account(s) {unknown}: use ids from list_accounts.`
 - `until must be the current month or later.`
 - `until must be at most 24 months ahead.`
 - `until must be a month as YYYY-MM, got '{until}'.`
+- `Unknown account(s) {unknown}: use ids from list_accounts.`
 
 ## [`get_budget_vs_actual`](/avenir-mcp/reference/tools/get-budget-vs-actual/)
 

@@ -69,6 +69,34 @@ Voor elke maand geeft het antwoord `start`, `inflows`, `outflows`, `end` en `low
 laagste saldo van welke dag ook in de maand. `first_shortfall` is de eerste maand waarvan
 `lowest` onder nul ligt.
 
+## De marge rond elk maandeinde
+
+De prognose geeft één saldo per maand; `end_low` en `end_high` zeggen hoe ver het ervan
+zou kunnen afwijken. Elk van de laatste **3** volle maanden had zijn eigen overige uitgaven
+en inkomsten, buiten terugkerende en geplande posten: hun steekproefstandaardafwijking *s*
+zegt hoe ver één maand afwijkt van het gemiddelde dat de prognose verdeelt. Na *H*
+geprojecteerde maanden (de lopende maand telt voor het deel van zijn resterende dagen)
+wijkt het saldo af met *s* × √(*H* + *H*² / 3): √*H* omdat maanden onafhankelijk van
+elkaar afwijken, en *H* / √3 omdat het gemiddelde zelf maar op 3 maanden rust, zodat zijn
+fout elke maand terugkomt. `end_low` en `end_high` zijn `end` min en plus dat bedrag: een
+gebruikelijke afwijking, niet het slechtste geval.
+
+- Terugkerende kosten, geplande transacties en eenmalige bedragen gelden als zeker; de
+  inkomsten ook wanneer u `monthly_income` opgeeft.
+- Met minder dan 3 volle maanden geschiedenis zijn de grenzen `null` en zegt `band.note`
+  waarom.
+- `band.first_possible_shortfall` is de eerste maand waarvan de laagste dag, min de marge,
+  onder nul ligt: zo vroeg zou het saldo onder nul kunnen komen.
+
+## Wat als
+
+`compare_scenarios` maakt dezelfde prognose, met dezelfde argumenten, als basis, en daarna
+opnieuw voor elk scenario met zijn aanpassingen: de gebruikelijke uitgave van een categorie
+gewijzigd, een bedrag elke maand of één keer toegevoegd, een terugkerende of geplande last
+weggelaten. Elke wijziging wordt geplaatst zoals de prognose haar eigen bedragen plaatst:
+verdeeld over de dagen voor uitgaven, op zijn dag voor de rest. Zie
+[Vooruit plannen](/avenir-mcp/nl/guides/plan-ahead/#wat-als).
+
 ## Grenzen
 
 <Aside type="caution">

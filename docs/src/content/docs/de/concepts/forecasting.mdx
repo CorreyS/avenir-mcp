@@ -71,6 +71,35 @@ Für jeden Monat gibt die Antwort `start`, `inflows`, `outflows`, `end` und `low
 den niedrigsten Saldo eines Tages im Monat. `first_shortfall` ist der erste Monat, dessen
 `lowest` unter null liegt.
 
+## Die Spanne um jedes Monatsende
+
+Die Prognose gibt einen Kontostand je Monat; `end_low` und `end_high` sagen, wie weit er
+davon abweichen könnte. Jeder der letzten **3** vollen Monate hatte seine eigenen übrigen
+Ausgaben und Einnahmen, ohne wiederkehrende und geplante Posten: ihre
+Stichproben-Standardabweichung *s* sagt, wie weit ein Monat vom Durchschnitt abweicht, den
+die Prognose verteilt. Nach *H* prognostizierten Monaten (der laufende Monat zählt mit dem
+Anteil seiner verbleibenden Tage) weicht der Kontostand um *s* × √(*H* + *H*² / 3) ab: √*H*,
+weil Monate unabhängig voneinander abweichen, und *H* / √3, weil der Durchschnitt selbst
+nur auf 3 Monaten beruht und sein Fehler sich so jeden Monat wiederholt. `end_low` und
+`end_high` sind `end` minus und plus diesen Betrag: eine typische Abweichung, nicht der
+schlimmste Fall.
+
+- Wiederkehrende Belastungen, geplante Transaktionen und einmalige Beträge gelten als
+  sicher; die Einnahmen auch, wenn Sie `monthly_income` angeben.
+- Mit weniger als 3 vollen Monaten Verlauf sind die Grenzen `null`, und `band.note` sagt,
+  warum.
+- `band.first_possible_shortfall` ist der erste Monat, dessen tiefster Tag abzüglich der
+  Spanne unter null liegt: so früh könnte der Kontostand unter null fallen.
+
+## Was wäre, wenn
+
+`compare_scenarios` macht dieselbe Prognose, mit denselben Argumenten, als Basis, dann noch
+einmal für jedes Szenario mit seinen Anpassungen: die übliche Ausgabe einer Kategorie
+geändert, ein Betrag jeden Monat oder einmal hinzugefügt, eine wiederkehrende oder geplante
+Belastung weggelassen. Jede Änderung wird so platziert, wie die Prognose ihre eigenen
+Beträge platziert: über die Tage verteilt für Ausgaben, an ihrem Tag für den Rest. Siehe
+[Vorausplanen](/avenir-mcp/de/guides/plan-ahead/#was-wäre-wenn).
+
 ## Grenzen
 
 <Aside type="caution">

@@ -67,6 +67,32 @@ For each month the answer gives `start`, `inflows`, `outflows`, `end` and `lowes
 lowest balance of any day in the month. `first_shortfall` is the first month whose
 `lowest` is below zero.
 
+## The range around each month-end
+
+The projection gives one balance per month; `end_low` and `end_high` say how far it could
+stray. Each of the last **3** full months had its own other spending and income, outside
+recurring charges and schedules: their sample standard deviation *s* says how far one month
+strays from the average the projection spreads. After *H* months projected (the current
+month counts for the share of its days left), the balance strays by
+*s* × √(*H* + *H*² / 3): √*H* because months stray independently of one another, and
+*H* / √3 because the average itself rests on only 3 months, so its error repeats every
+month. `end_low` and `end_high` are `end` less and plus that amount: a typical gap, not a
+worst case.
+
+- Recurring charges, scheduled transactions and one-off amounts count as certain; so does
+  the income when you give `monthly_income`.
+- With fewer than 3 full months of history, the bounds are `null` and `band.note` says why.
+- `band.first_possible_shortfall` is the first month whose lowest day, less the range, is
+  below zero: the balance could go below zero as early as that.
+
+## What if
+
+`compare_scenarios` makes the same projection, with the same arguments, as a baseline, then
+again for each scenario with its adjustments: a category's usual spending changed, an amount
+added every month or once, a recurring charge or schedule left out. Each change is placed
+the way the projection places its own amounts: spread over the days for spending, on its day
+for the rest. See [Plan ahead](/avenir-mcp/guides/plan-ahead/#what-if).
+
 ## Limits
 
 <Aside type="caution">

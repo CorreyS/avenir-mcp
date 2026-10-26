@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside } from '@astrojs/starlight/components';
 
-avenir-mcp donne à un agent 37 outils, 4 ressources et 4 prompts sur vos plans YNAB. Cette
+avenir-mcp donne à un agent 38 outils, 4 ressources et 4 prompts sur vos plans YNAB. Cette
 page les classe selon ce que vous voulez faire. Chaque ligne donne une phrase à dire à
 l'agent ; c'est lui qui choisit l'outil.
 
@@ -92,7 +92,8 @@ plus). Guides : [Rapprocher un compte](/avenir-mcp/fr/guides/reconcile/),
 
 | Vous dites | Outil | |
 |---|---|---|
-| *« Vais-je passer sous zéro avant décembre ? »* | [`forecast_balance`](/avenir-mcp/fr/reference/tools/forecast-balance/) — mois par mois, avec ses hypothèses | L |
+| *« Vais-je passer sous zéro avant décembre ? »* | [`forecast_balance`](/avenir-mcp/fr/reference/tools/forecast-balance/) — mois par mois, avec une fourchette autour de chaque fin de mois et ses hypothèses | L |
+| *« Et si on réduisait les restaurants de 20 % et qu'on ajoutait un crédit auto de 450 à partir de mars ? »* | [`compare_scenarios`](/avenir-mcp/fr/reference/tools/compare-scenarios/) — jusqu'à 4 hypothèses face au plan tel qu'il est : le solde mois par mois, l'écart, le point le plus bas et le premier mois sous zéro | L |
 | *« Est-ce que je rembourse mes dettes ? »* | [`get_net_worth_trend`](/avenir-mcp/fr/reference/tools/get-net-worth-trend/) — actifs, dettes et patrimoine net à chaque fin de mois, comptes de suivi compris | L |
 | *« Si je perdais mes revenus, combien de temps tiendrais-je ? »* | [`get_runway`](/avenir-mcp/fr/reference/tools/get-runway/) — les mois que l'argent du budget couvrirait aux dépenses habituelles, l'essentiel à part | L |
 | *« Quelles grosses factures arrivent cette année, et suis-je prêt ? »* | [`get_upcoming_expenses`](/avenir-mcp/fr/reference/tools/get-upcoming-expenses/) — les factures annuelles, semestrielles et trimestrielles, planifiées ou trouvées dans l'historique, et si chaque catégorie aura assez à temps | L |

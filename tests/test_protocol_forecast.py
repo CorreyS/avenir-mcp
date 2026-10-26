@@ -274,3 +274,60 @@ def test_a_schedule_named_briefly_still_replaces_the_bank_payee(budget: AsyncMoc
     assert "CAR LEASE" not in [r["payee"] for r in after["assumptions"]["recurring"]]
     for month in ("2026-09", "2026-10"):
         assert _outflows(after, month) == _outflows(before, month)
+
+
+def _spending(amounts: dict[int, int], payee: str = "SHOP") -> list[dict[str, Any]]:
+    """Other spending (or income, when positive), one amount per month number."""
+    return [
+        {
+            "payee_name": f"{payee} {m}",
+            "amount": amount,
+            "date": f"2026-{m:02d}-12",
+            "deleted": False,
+            "transfer_account_id": None,
+            "account_id": "acc",
+        }
+        for m, amount in amounts.items()
+    ]
+
+
+def test_each_month_end_comes_with_a_range_that_widens() -> None:
+    """Other spending that strayed by 100 a month gives a range around every month-end."""
+    history = _TXS + _spending({6: -100_000, 7: -300_000, 8: -200_000})
+    with patch("avenir_mcp.client.get_transactions", AsyncMock(return_value=history)):
+        data = _call({"plan_id": "b1", "until": "2026-11"}).structured_content
+    band = data["band"]
+    assert band["deviation"] == 100.0
+    assert band["months"] == ["2026-06", "2026-07", "2026-08"]
+    halves = [round(m["end_high"] - m["end"], 2) for m in data["months"]]
+    assert halves == [46.19, 129.61, 195.28]
+    assert all(m["end_low"] <= m["end"] <= m["end_high"] for m in data["months"])
+
+
+def test_the_range_leaves_out_the_income_the_caller_gives() -> None:
+    """Given, income is certain: only the other spending strays."""
+    history = _TXS + _spending({6: 100_000, 7: 300_000, 8: 200_000}, payee="CLIENT")
+    with patch("avenir_mcp.client.get_transactions", AsyncMock(return_value=history)):
+        found = _call({"plan_id": "b1", "until": "2026-10"}).structured_content
+        given = _call({"plan_id": "b1", "until": "2026-10", "monthly_income": 2000})
+    assert found["band"]["deviation"] == 100.0
+    assert given.structured_content["band"]["deviation"] == 0.0
+
+
+def test_a_young_plan_has_no_range_and_says_why() -> None:
+    """Fewer than 3 complete months: the bounds are null, the projection the same."""
+    young = [tx for tx in _TXS if str(tx["date"]) >= "2026-08"]
+    with patch("avenir_mcp.client.get_transactions", AsyncMock(return_value=young)):
+        data = _call({"plan_id": "b1", "until": "2026-10"}).structured_content
+    assert data["band"]["deviation"] is None
+    assert "3 complete months" in data["band"]["note"]
+    assert {(m["end_low"], m["end_high"]) for m in data["months"]} == {(None, None)}
+
+
+def test_the_range_says_how_early_the_balance_could_go_below_zero() -> None:
+    """The low end can dip before the projection does: the first such month is named."""
+    history = _TXS + _spending({6: -100_000, 7: -300_000, 8: -200_000})
+    with patch("avenir_mcp.client.get_transactions", AsyncMock(return_value=history)):
+        data = _call({"plan_id": "b1", "until": "2027-03"}).structured_content
+    possible = data["band"]["first_possible_shortfall"]
+    assert possible is not None and possible <= data["first_shortfall"]

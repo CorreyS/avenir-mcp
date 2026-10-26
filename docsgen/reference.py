@@ -57,6 +57,7 @@ GUIDES = {
     "get_savings_rate": "guides/monthly-review",
     "get_age_of_money": "guides/monthly-review",
     "forecast_balance": "guides/plan-ahead",
+    "compare_scenarios": "guides/plan-ahead",
     "find_recurring_charges": "guides/plan-ahead",
     "get_net_worth_trend": "guides/plan-ahead",
     "get_runway": "guides/plan-ahead",

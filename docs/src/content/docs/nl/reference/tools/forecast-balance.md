@@ -24,9 +24,18 @@ monthly income (default: the last 3 months' non-recurring inflows, which may
 include one-off money such as capital injections) and one-off amounts such as
 a tax bill (negative) or a refund (positive). Amounts in currency units.
 `lowest` is the lowest point within a month; `first_shortfall` is the first
-month it goes below zero. For a month already gone use get_monthly_summary, or
-get_spending_trends to compare several; for how long today's money would last
-with no income at all, get_runway. Changes nothing.
+month it goes below zero. `end_low` and `end_high` give each month-end a range:
+one standard deviation of how far the last 3 full months' other spending and
+income (spending alone when you pass monthly_income) strayed from their average,
+widening with each month projected. It is a typical gap, not a worst case;
+`band.first_possible_shortfall` is the first month the balance could go below
+zero within it, and `band.note` says how it was made, or why the bounds are null
+(fewer than 3 full months of history). For a month already gone use
+get_monthly_summary, or get_spending_trends to compare several; for how long
+today's money would last with no income at all, get_runway; for what-ifs (a
+category cut, a new monthly payment, a cancelled subscription), compare_scenarios.
+Four YNAB requests (accounts, transactions, scheduled transactions, categories);
+changes nothing.
 
 ## Gedrag
 
@@ -69,7 +78,14 @@ with no income at all, get_runway. Changes nothing.
 | `months[].outflows` | number | Money expected out during the month, negative. |
 | `months[].end` | number | Projected balance at the end of the month. |
 | `months[].lowest` | number | Lowest projected balance within the month, day by day. |
+| `months[].end_low` | number \| null | Low end of the range around `end`: one deviation below it (see band); null when the history is too short to make a range. |
+| `months[].end_high` | number \| null | High end of the range around `end`: one deviation above it; null when the history is too short to make a range. |
 | `first_shortfall` | string \| null | First month whose lowest balance is below zero; null if none. |
+| `band` | object | How the range around each month-end (end_low, end_high) was made, or why there is none, and the first month the balance could go below zero within it. |
+| `band.deviation` | number \| null | One standard deviation of a month's other spending and income, net, over the months measured, in currency units; null when the history is too short. |
+| `band.months` | array of string | The complete months measured, YYYY-MM, oldest first. |
+| `band.first_possible_shortfall` | string \| null | First month whose lowest balance, less the range's half-width at its end, is below zero: the balance could go below zero as early as this; null if none or no range. |
+| `band.note` | string | How the range was made, or why there is none, for the agent to relay. |
 
 ## Voorbeeld
 
@@ -212,7 +228,9 @@ Antwoord op het demobudget:
       "inflows": 3200.0,
       "outflows": 0.0,
       "end": 6334.48,
-      "lowest": 3134.48
+      "lowest": 3134.48,
+      "end_low": 6334.48,
+      "end_high": 6334.48
     },
     {
       "month": "2026-10",
@@ -220,7 +238,9 @@ Antwoord op het demobudget:
       "inflows": 3200.0,
       "outflows": -2074.27,
       "end": 7460.21,
-      "lowest": 5694.17
+      "lowest": 5694.17,
+      "end_low": 7460.21,
+      "end_high": 7460.21
     },
     {
       "month": "2026-11",
@@ -228,7 +248,9 @@ Antwoord op het demobudget:
       "inflows": 3200.0,
       "outflows": -1654.27,
       "end": 9005.94,
-      "lowest": 6830.22
+      "lowest": 6830.22,
+      "end_low": 9005.94,
+      "end_high": 9005.94
     },
     {
       "month": "2026-12",
@@ -236,19 +258,31 @@ Antwoord op het demobudget:
       "inflows": 3200.0,
       "outflows": -2134.27,
       "end": 10071.67,
-      "lowest": 7885.63
+      "lowest": 7885.63,
+      "end_low": 10071.67,
+      "end_high": 10071.67
     }
   ],
-  "first_shortfall": null
+  "first_shortfall": null,
+  "band": {
+    "deviation": 0.0,
+    "months": [
+      "2026-06",
+      "2026-07",
+      "2026-08"
+    ],
+    "first_possible_shortfall": null,
+    "note": "end_low and end_high: equal to end, since the other spending of 2026-06 to 2026-08 did not vary from month to month. Recurring charges, schedules, one-offs and the income given count as certain: a typical gap, not a worst case."
+  }
 }
 ```
 
 ## Fouten
 
-- `Unknown account(s) {unknown}: use ids from list_accounts.`
 - `until must be the current month or later.`
 - `until must be at most 24 months ahead.`
 - `until must be a month as YYYY-MM, got '{until}'.`
+- `Unknown account(s) {unknown}: use ids from list_accounts.`
 
 Fouten van YNAB zelf komen terug als `Error calling tool '<tool>': YNAB <status>: <detail>`.
 

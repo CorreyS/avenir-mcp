@@ -33,6 +33,8 @@ Naslag = "Naslag"
 # The demo budget's names in French and Spanish (evals/demo_budget.py).
 Projets = "Projets"
 Restaurantes = "Restaurantes"
+# What a documented call types in Dutch (docsgen/examples.py): "in cash".
+contant = "contant"
 # The PyPI distribution that carries the CA bundle, named in a commit message and so
 # in CHANGELOG.md. typos skips lock files, where it appears otherwise, but not prose.
 certifi = "certifi"

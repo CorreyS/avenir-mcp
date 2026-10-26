@@ -15,6 +15,7 @@ import pace from '@snippets/category_pace.json?raw';
 import goal from '@snippets/goal_projection.json?raw';
 import upcomingExpenses from '@snippets/upcoming_expenses.json?raw';
 import paycheckPlan from '@snippets/paycheck_plan.json?raw';
+import scenarios from '@snippets/scenarios.json?raw';
 
 **Goal:** know whether the money lasts, and when it would run out, before it does.
 
@@ -71,6 +72,13 @@ Details: [Forecasting](/avenir-mcp/concepts/forecasting/).
 - `months[].lowest`: the lowest point within the month, day by day — the one that tells
   you whether a payment would bounce.
 - `first_shortfall`: the first month whose lowest point is below zero, or `null`.
+- `months[].end_low`, `end_high`: a range around each month-end, one standard deviation
+  of how far the other spending (and the income, unless you give it) of the last 3 full
+  months strayed from its average, widening month after month. In the demo plan, whose other
+  spending did not vary, they equal `end`. `band.note` says how the range was made, or why
+  there is none (fewer than 3 full months of history).
+- `band.first_possible_shortfall`: the first month the balance could go below zero within
+  that range, or `null`.
 
 <Aside type="caution" title="A projection, not a prediction">
 It extends your recent months. A holiday, a yearly tax or a one-off purchase in them
@@ -171,6 +179,7 @@ today, 2,000 is reached in March 2027, and 171.43 a month would be enough to get
 then.
 
 <Code code={goal} lang="json" title="get_goal_projection" />
+
 ## The bills that do not come every month
 
 Ask *"which big bills are coming this year, and am I ready for them?"*:
@@ -203,6 +212,29 @@ the salary comes on the 28th with nothing due before it, and October's bills lea
 checking account at 3,460.21 at its lowest, on the 24th.
 
 <Code code={paycheckPlan} lang="json" title="get_paycheck_plan (excerpt)" />
+
+## What if?
+
+Ask *"what if we cut restaurants by 20 % and add a 450 car payment from November, or buy
+the car outright?"*: `compare_scenarios` makes the same projection as `forecast_balance`, with
+the same arguments, as the baseline, then the projection of each scenario (4 at most), a
+named list of adjustments:
+
+| Adjustment | What it changes |
+|---|---|
+| `change_spending` | a category's or group's usual monthly spending, the average of the last 3 full months, by `percent` or to `monthly_spending`, spread over each month's days |
+| `add_monthly` | an amount on a `day` of each month from `start` (until `end`): a new charge, or income |
+| `add_one_off` | an amount once, on `date` |
+| `drop_recurring` | a recurring charge or scheduled payment no longer paid from `start`, found by a word of its `payee` |
+
+Each scenario comes back month by month, with its `difference` from the baseline, the
+difference at the end, its lowest balance and that month, the first month below zero and
+how each adjustment was applied. Here restaurants cost 112.00 a month, so a fifth less
+leaves 22.40 a month; with the car payment from November, the balance is 829.07 lower by
+December. Buying the car outright on 15 November takes it below zero that month, to
+−1,435.53, even without Streamflix. Four YNAB requests, whatever the number of scenarios.
+
+<Code code={scenarios} lang="json" title="compare_scenarios (excerpt)" />
 
 ## Then budget next month
 

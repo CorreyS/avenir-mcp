@@ -69,6 +69,34 @@ Pour chaque mois, la réponse donne `start`, `inflows`, `outflows`, `end` et `lo
 solde le plus bas d'un jour du mois. `first_shortfall` est le premier mois dont `lowest`
 passe sous zéro.
 
+## La fourchette autour de chaque fin de mois
+
+La projection donne un solde par mois ; `end_low` et `end_high` disent de combien il
+pourrait s'en écarter. Chacun des **3** derniers mois complets a eu ses propres autres
+dépenses et revenus, hors charges récurrentes et planifiées : leur écart-type
+d'échantillon *s* dit de combien un mois s'écarte de la moyenne que la projection répartit.
+Après *H* mois projetés (le mois en cours compte pour la part de ses jours restants), le
+solde s'écarte de *s* × √(*H* + *H*² / 3) : √*H* parce que les mois s'écartent
+indépendamment les uns des autres, et *H* / √3 parce que la moyenne elle-même ne repose que
+sur 3 mois, si bien que son erreur se répète chaque mois. `end_low` et `end_high` sont `end`
+moins et plus ce montant : un écart typique, pas le pire des cas.
+
+- Les charges récurrentes, les transactions planifiées et les montants ponctuels comptent
+  comme certains ; les revenus aussi quand vous donnez `monthly_income`.
+- Avec moins de 3 mois complets d'historique, les bornes valent `null` et `band.note` dit
+  pourquoi.
+- `band.first_possible_shortfall` est le premier mois dont le jour le plus bas, moins la
+  fourchette, est sous zéro : le solde pourrait passer sous zéro dès ce mois-là.
+
+## Et si
+
+`compare_scenarios` fait la même projection, avec les mêmes arguments, comme référence, puis
+de nouveau pour chaque scénario avec ses ajustements : la dépense habituelle d'une catégorie
+modifiée, un montant ajouté chaque mois ou une fois, une charge récurrente ou planifiée
+retirée. Chaque changement est placé comme la projection place ses propres montants :
+réparti sur les jours pour les dépenses, à son jour pour le reste. Voir
+[Anticiper](/avenir-mcp/fr/guides/plan-ahead/#et-si-).
+
 ## Limites
 
 <Aside type="caution">

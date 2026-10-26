@@ -494,3 +494,118 @@ def test_a_deleted_month_is_not_held() -> None:
 def test_all_the_months_are_held_when_the_plan_has_fewer() -> None:
     """A plan younger than the period asked for gives every month it has."""
     assert _held(_months("2026-08-01", "2026-09-01"), 3) == ["2026-08-01", "2026-09-01"]
+
+
+# ---------------------------------------------------------------------------
+# band: a range around each month-end
+# ---------------------------------------------------------------------------
+
+
+def _shopping(*amounts: int) -> list[dict[str, Any]]:
+    """Other spending of June, July and August, one amount each, in milliunits."""
+    return [
+        _tx(f"SHOP {month}", amount, f"{month}-12")
+        for month, amount in zip(("2026-06", "2026-07", "2026-08"), amounts, strict=True)
+    ]
+
+
+def _flat(start: float = 1000.0, until: str = "2026-11") -> forecast.Projection:
+    """A projection spending 200 a month from TODAY, nothing else."""
+    return forecast.project(
+        start_balance=start,
+        today=TODAY,
+        until=until,
+        recurring=[],
+        variable_monthly=-200.0,
+        monthly_income=0.0,
+        one_offs=[],
+    )
+
+
+def test_a_projection_alone_has_no_range() -> None:
+    """project() leaves the range to band(): its months have no bounds."""
+    assert {(m.end_low, m.end_high) for m in _flat().months} == {(None, None)}
+
+
+def test_the_range_widens_with_each_month_projected() -> None:
+    """One deviation of 100 a month: 6 of September's 30 days left, then whole months."""
+    projection, band = forecast.band(_flat(), _shopping(-100000, -300000, -200000), TODAY, [])
+    assert band.deviation == 100.0
+    assert band.months == ["2026-06", "2026-07", "2026-08"]
+    halves = [round(m.end - m.end_low, 2) for m in projection.months]  # type: ignore[operator]
+    assert halves == [46.19, 129.61, 195.28]
+    assert [round(m.end_high - m.end, 2) for m in projection.months] == halves  # type: ignore[operator]
+    assert [m.end for m in projection.months] == [m.end for m in _flat().months]
+    assert "100.00 a month" in band.note
+
+
+def test_without_three_complete_months_there_is_no_range() -> None:
+    """Two months of history say nothing reliable about how a month strays."""
+    history = _shopping(-100000, -300000, -200000)[1:]
+    projection, band = forecast.band(_flat(), history, TODAY, [])
+    assert band.deviation is None and band.first_possible_shortfall is None
+    assert band.months == ["2026-07", "2026-08"]
+    assert {(m.end_low, m.end_high) for m in projection.months} == {(None, None)}
+    assert "3 complete months" in band.note and "2" in band.note
+
+
+def test_a_month_with_no_other_spending_counts_as_nothing_spent() -> None:
+    """History since May: a quiet July still counts, as zero."""
+    history = [_tx("OPENING", -1000, "2026-05-02"), *_shopping(-150000, 0, -150000)]
+    history = [tx for tx in history if tx["amount"]]
+    _, band = forecast.band(_flat(), history, TODAY, [])
+    assert band.deviation == 86.6
+
+
+def test_recurring_and_scheduled_payees_do_not_widen_the_range() -> None:
+    """They are projected on their own: only the other spending is measured."""
+    history = _monthly("RENT", -900000, 3, ["2026-06", "2026-07", "2026-08"])
+    history += [_tx("ENERGY", amount, f"2026-{m}-15") for m, amount in (("06", -10000),
+                ("07", -90000), ("08", -50000))]  # fmt: skip
+    known = forecast.recurring(history, TODAY)
+    _, band = forecast.band(_flat(), history, TODAY, known, also=frozenset({("ENERGY", True)}))
+    assert band.deviation == 0.0
+    assert "equal to end" in band.note and "did not vary" in band.note
+
+
+def test_income_strays_too_unless_it_is_given() -> None:
+    """Spending and income are measured net; income the caller gives counts as certain."""
+    history = _shopping(-100000, -100000, -100000) + [
+        _tx(f"CLIENT {m}", amount, f"2026-{m}-20")
+        for m, amount in (("06", 100000), ("07", 300000), ("08", 200000))
+    ]
+    _, measured = forecast.band(_flat(), history, TODAY, [])
+    _, given = forecast.band(_flat(), history, TODAY, [], with_income=False)
+    assert (measured.deviation, given.deviation) == (100.0, 0.0)
+    assert "income" in measured.note and "the income given" in given.note
+
+
+def test_the_low_end_can_go_below_zero_before_the_projection_does() -> None:
+    """first_possible_shortfall is the first month the low end of its lowest day dips."""
+    projection, band = forecast.band(
+        _flat(start=700.0, until="2027-01"), _shopping(-100000, -300000, -200000), TODAY, []
+    )
+    assert forecast.project(  # the projection itself stays above zero until December
+        start_balance=700.0, today=TODAY, until="2027-01", recurring=[],
+        variable_monthly=-200.0, monthly_income=0.0, one_offs=[],
+    ).first_shortfall == "2026-12"  # fmt: skip
+    assert band.first_possible_shortfall == "2026-11"
+    assert projection.months[2].end_low < 0  # type: ignore[operator]
+
+
+def test_a_monthly_change_is_spread_over_the_days_left_of_its_month() -> None:
+    """A change given for a month moves that month and the next, never one before it."""
+    plain = _flat(until="2026-10")
+    changed = forecast.project(
+        start_balance=1000.0,
+        today=TODAY,
+        until="2026-10",
+        recurring=[],
+        variable_monthly=-200.0,
+        monthly_income=0.0,
+        one_offs=[],
+        monthly_changes={"2026-10": -310.0, "2027-01": -1.0},
+    )
+    assert changed.months[0] == plain.months[0]
+    assert round(changed.months[1].end - plain.months[1].end, 2) == -310.0
+    assert round(changed.months[1].lowest - plain.months[1].lowest, 2) == -310.0

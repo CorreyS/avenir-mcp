@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside } from '@astrojs/starlight/components';
 
-avenir-mcp gives an agent 37 tools, 4 resources and 4 prompts over your YNAB plans. This
+avenir-mcp gives an agent 38 tools, 4 resources and 4 prompts over your YNAB plans. This
 page lists them by what you want to do. Each row gives a sentence you can say to the
 agent; the agent chooses the tool.
 
@@ -89,7 +89,8 @@ and likely duplicates (same amount and merchant, at most 3 days apart). Guides:
 
 | You say | Tool | |
 |---|---|---|
-| *“Will I go below zero before December?”* | [`forecast_balance`](/avenir-mcp/reference/tools/forecast-balance/) — month by month, with its assumptions | R |
+| *“Will I go below zero before December?”* | [`forecast_balance`](/avenir-mcp/reference/tools/forecast-balance/) — month by month, with a range around each month-end and its assumptions | R |
+| *“What if we cut dining out by 20 % and add a 450 car payment from March?”* | [`compare_scenarios`](/avenir-mcp/reference/tools/compare-scenarios/) — up to 4 what-ifs against the plan as it is: the balance month by month, the gap, the lowest point and the first month below zero | R |
 | *“Am I paying off my debts?”* | [`get_net_worth_trend`](/avenir-mcp/reference/tools/get-net-worth-trend/) — assets, debts and net worth at each month end, tracking accounts included | R |
 | *“If I lost my income, how long could I last?”* | [`get_runway`](/avenir-mcp/reference/tools/get-runway/) — months the money in the budget would cover the usual spending, essentials apart | R |
 | *“Which big bills are coming this year, and am I ready?”* | [`get_upcoming_expenses`](/avenir-mcp/reference/tools/get-upcoming-expenses/) — yearly, half-yearly and quarterly bills, scheduled or found in the history, and whether each category will hold enough in time | R |

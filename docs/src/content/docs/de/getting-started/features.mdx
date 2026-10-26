@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside } from '@astrojs/starlight/components';
 
-avenir-mcp gibt einem Agenten 37 Tools, 4 Ressourcen und 4 Prompts für Ihre
+avenir-mcp gibt einem Agenten 38 Tools, 4 Ressourcen und 4 Prompts für Ihre
 YNAB-Plans. Diese Seite ordnet sie nach dem, was Sie tun möchten. Jede Zeile nennt einen
 Satz, den Sie dem Agenten sagen können; der Agent wählt das Tool.
 
@@ -91,7 +91,8 @@ Differenz entspricht, und wahrscheinliche Duplikate (gleicher Betrag und Händle
 
 | Sie sagen | Tool | |
 |---|---|---|
-| *„Rutsche ich vor Dezember unter null?“* | [`forecast_balance`](/avenir-mcp/de/reference/tools/forecast-balance/) – Monat für Monat, mit seinen Annahmen | L |
+| *„Rutsche ich vor Dezember unter null?“* | [`forecast_balance`](/avenir-mcp/de/reference/tools/forecast-balance/) – Monat für Monat, mit einer Spanne um jedes Monatsende und seinen Annahmen | L |
+| *„Was, wenn wir 20 % weniger auswärts essen und ab März eine Autorate von 450 dazukommt?“* | [`compare_scenarios`](/avenir-mcp/de/reference/tools/compare-scenarios/) – bis zu 4 Szenarien gegen den Plan, wie er ist: der Kontostand Monat für Monat, die Differenz, der Tiefststand und der erste Monat unter null | L |
 | *„Baue ich meine Schulden ab?“* | [`get_net_worth_trend`](/avenir-mcp/de/reference/tools/get-net-worth-trend/) – Vermögen, Schulden und Nettovermögen zu jedem Monatsende, Tracking-Konten eingeschlossen | L |
 | *„Wenn mein Einkommen wegfiele, wie lange käme ich aus?“* | [`get_runway`](/avenir-mcp/de/reference/tools/get-runway/) – wie viele Monate das Geld im Budget die üblichen Ausgaben decken würde, das Nötigste gesondert | L |
 | *„Welche großen Rechnungen kommen dieses Jahr, und bin ich bereit?“* | [`get_upcoming_expenses`](/avenir-mcp/de/reference/tools/get-upcoming-expenses/) – jährliche, halbjährliche und vierteljährliche Rechnungen, geplant oder im Verlauf gefunden, und ob jede Kategorie rechtzeitig genug hat | L |

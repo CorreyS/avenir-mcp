@@ -68,6 +68,34 @@ Para cada mes la respuesta da `start`, `inflows`, `outflows`, `end` y `lowest`, 
 más bajo de cualquier día del mes. `first_shortfall` es el primer mes cuyo `lowest` está
 bajo cero.
 
+## El margen alrededor de cada fin de mes
+
+La proyección da un saldo por mes; `end_low` y `end_high` dicen cuánto podría apartarse de
+él. Cada uno de los **3** últimos meses completos tuvo sus propios demás gastos e ingresos,
+fuera de los cargos recurrentes y programados: su desviación típica muestral *s* dice
+cuánto se aparta un mes de la media que la proyección reparte. Tras *H* meses proyectados
+(el mes en curso cuenta por la parte de sus días restantes), el saldo se aparta
+*s* × √(*H* + *H*² / 3): √*H* porque los meses se apartan independientemente unos de otros,
+y *H* / √3 porque la propia media descansa solo en 3 meses, así que su error se repite cada
+mes. `end_low` y `end_high` son `end` menos y más ese importe: una diferencia típica, no el
+peor caso.
+
+- Los cargos recurrentes, las transacciones programadas y los importes puntuales cuentan
+  como seguros; los ingresos también cuando da `monthly_income`.
+- Con menos de 3 meses completos de historial, los límites valen `null` y `band.note` dice
+  por qué.
+- `band.first_possible_shortfall` es el primer mes cuyo día más bajo, menos el margen, está
+  bajo cero: el saldo podría bajar de cero ya ese mes.
+
+## Y si
+
+`compare_scenarios` hace la misma proyección, con los mismos argumentos, como referencia, y
+otra vez para cada escenario con sus ajustes: el gasto habitual de una categoría cambiado, un
+importe añadido cada mes o una vez, un cargo recurrente o programado retirado. Cada cambio se
+coloca como la proyección coloca sus propios importes: repartido entre los días para los
+gastos, en su día para el resto. Vea
+[Planificar](/avenir-mcp/es/guides/plan-ahead/#y-si).
+
 ## Límites
 
 <Aside type="caution">

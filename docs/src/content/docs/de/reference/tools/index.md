@@ -11,6 +11,7 @@ avenir-mcp stellt diese Tools bereit. Lesende Tools sind immer verfügbar; schre
 
 | Tool | Kurzbeschreibung |
 |---|---|
+| [`compare_scenarios`](/avenir-mcp/de/reference/tools/compare-scenarios/) | Project the balance with changes the user is weighing, against the plan as it is. |
 | [`find_recurring_charges`](/avenir-mcp/de/reference/tools/find-recurring-charges/) | List the subscriptions and other charges paid every month, with their yearly cost. |
 | [`find_transactions`](/avenir-mcp/de/reference/tools/find-transactions/) | Find transactions by date, amount, account, category or payee, categorised or not. |
 | [`forecast_balance`](/avenir-mcp/de/reference/tools/forecast-balance/) | Project the balance month by month and say when money would run out. |

@@ -124,7 +124,9 @@
       "inflows": 3200.0,
       "outflows": 0.0,
       "end": 6334.48,
-      "lowest": 3134.48
+      "lowest": 3134.48,
+      "end_low": 6334.48,
+      "end_high": 6334.48
     },
     {
       "month": "2026-10",
@@ -132,7 +134,9 @@
       "inflows": 3200.0,
       "outflows": -2074.27,
       "end": 7460.21,
-      "lowest": 5694.17
+      "lowest": 5694.17,
+      "end_low": 7460.21,
+      "end_high": 7460.21
     },
     {
       "month": "2026-11",
@@ -140,7 +144,9 @@
       "inflows": 3200.0,
       "outflows": -1654.27,
       "end": 9005.94,
-      "lowest": 6830.22
+      "lowest": 6830.22,
+      "end_low": 9005.94,
+      "end_high": 9005.94
     },
     {
       "month": "2026-12",
@@ -148,8 +154,20 @@
       "inflows": 3200.0,
       "outflows": -2134.27,
       "end": 10071.67,
-      "lowest": 7885.63
+      "lowest": 7885.63,
+      "end_low": 10071.67,
+      "end_high": 10071.67
     }
   ],
-  "first_shortfall": null
+  "first_shortfall": null,
+  "band": {
+    "deviation": 0.0,
+    "months": [
+      "2026-06",
+      "2026-07",
+      "2026-08"
+    ],
+    "first_possible_shortfall": null,
+    "note": "end_low and end_high: equal to end, since the other spending of 2026-06 to 2026-08 did not vary from month to month. Recurring charges, schedules, one-offs and the income given count as certain: a typical gap, not a worst case."
+  }
 }

@@ -15,6 +15,7 @@ import pace from '@snippets/es/category_pace.json?raw';
 import goal from '@snippets/es/goal_projection.json?raw';
 import upcomingExpenses from '@snippets/es/upcoming_expenses.json?raw';
 import paycheckPlan from '@snippets/es/paycheck_plan.json?raw';
+import scenarios from '@snippets/es/scenarios.json?raw';
 
 **Objetivo:** saber si el dinero alcanza, y cuándo se acabaría, antes de que ocurra.
 
@@ -70,6 +71,13 @@ Detalles: [Previsión](/avenir-mcp/es/concepts/forecasting/).
 - `months[].lowest`: el punto más bajo del mes, día a día — el que le dice si un pago
   sería rechazado.
 - `first_shortfall`: el primer mes cuyo punto más bajo está bajo cero, o `null`.
+- `months[].end_low`, `end_high`: un margen alrededor de cada fin de mes, de una
+  desviación típica de cuánto se apartaron de su media los demás gastos (y los ingresos,
+  salvo si usted los da) de los 3 últimos meses completos, que se ensancha mes a mes. En el
+  presupuesto de demostración, cuyos demás gastos no variaron, valen `end`. `band.note` dice
+  cómo se hizo el margen, o por qué no hay ninguno (menos de 3 meses completos de historial).
+- `band.first_possible_shortfall`: el primer mes en que el saldo podría bajar de cero dentro
+  de ese margen, o `null`.
 
 <Aside type="caution" title="Una proyección, no una predicción">
 Prolonga sus últimos meses. Unas vacaciones, un impuesto anual o una compra puntual en
@@ -172,6 +180,7 @@ Aquí el hogar pone 200 al mes en Vacaciones desde junio: de los 800 que tiene h
 2.000 en marzo de 2027, y 171,43 al mes bastarían para llegar en esa fecha.
 
 <Code code={goal} lang="json" title="get_goal_projection" />
+
 ## Las facturas que no llegan cada mes
 
 Pregunte *«¿qué facturas grandes llegan este año y estoy preparado?»*:
@@ -204,6 +213,29 @@ sueldo llega el 28 sin nada que pagar antes, y las facturas de octubre dejan la 
 corriente en 3.460,21 en su punto más bajo, el 24.
 
 <Code code={paycheckPlan} lang="json" title="get_paycheck_plan (extracto)" />
+
+## ¿Y si…?
+
+Pregunte *«¿y si recortamos un 20 % los restaurantes y añadimos una cuota del coche de 450
+desde noviembre, o compramos el coche al contado?»*: `compare_scenarios` hace la misma
+proyección que `forecast_balance`, con los mismos argumentos, como referencia, y después la
+de cada escenario (4 como máximo), una lista con nombre de ajustes:
+
+| Ajuste | Qué cambia |
+|---|---|
+| `change_spending` | el gasto mensual habitual de una categoría o de un grupo, la media de los 3 últimos meses completos, en `percent` o hasta `monthly_spending`, repartido entre los días de cada mes |
+| `add_monthly` | un importe el `day` de cada mes desde `start` (hasta `end`): un cargo nuevo, o un ingreso |
+| `add_one_off` | un importe una sola vez, en `date` |
+| `drop_recurring` | un cargo recurrente o un pago programado que deja de pagarse desde `start`, encontrado por una palabra de su `payee` |
+
+Cada escenario vuelve mes a mes, con su `difference` respecto a la referencia, la
+diferencia al final, su saldo más bajo y ese mes, el primer mes bajo cero y cómo se aplicó
+cada ajuste. Aquí los restaurantes cuestan 112,00 al mes: una quinta parte menos deja 22,40
+al mes; con la cuota del coche desde noviembre, el saldo es 829,07 más bajo en diciembre.
+Comprar el coche al contado el 15 de noviembre lo lleva bajo cero ese mes, a −1.435,53,
+incluso sin Streamflix. Cuatro solicitudes a YNAB, sea cual sea el número de escenarios.
+
+<Code code={scenarios} lang="json" title="compare_scenarios (extracto)" />
 
 ## Después, presupuestar el mes siguiente
 

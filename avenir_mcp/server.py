@@ -38,6 +38,7 @@ from avenir_mcp import (  # noqa: F401  pylint: disable=unused-import
     tools_payoff,
     tools_runway,
     tools_savings,
+    tools_scenarios,
     tools_targets,
     tools_underfunded,
     tools_undo,

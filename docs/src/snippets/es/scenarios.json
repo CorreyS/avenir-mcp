@@ -1,0 +1,225 @@
+{
+  "message": "Baseline: never below zero, lowest 3134.48 in 2026-09. Menos restaurantes, cuota del coche: -829.07 against the baseline by 2026-12, never below zero, lowest 3134.48 in 2026-09. Comprar el coche al contado: -8959.53 against the baseline by 2026-12, below zero from 2026-11, lowest -1435.53 in 2026-11. This rests on the assumptions listed: check them with the user.",
+  "accounts": [
+    "Cuenta corriente",
+    "Ahorro"
+  ],
+  "start_balance": 3134.48,
+  "assumptions": {
+    "recurring": [
+      {
+        "payee": "CHEZ LUCIE",
+        "amount": -49.2,
+        "day": 10,
+        "months_seen": 3
+      },
+      {
+        "payee": "MARKET FRESH",
+        "amount": -395.9,
+        "day": 14,
+        "months_seen": 3
+      },
+      {
+        "payee": "RAIL CO",
+        "amount": -45.0,
+        "day": 18,
+        "months_seen": 3
+      },
+      {
+        "payee": "STREAMFLIX",
+        "amount": -13.49,
+        "day": 15,
+        "months_seen": 3
+      },
+      "… 2 more"
+    ],
+    "variable_monthly": 0.0,
+    "monthly_income": 3200.0,
+    "one_offs": [],
+    "scheduled": [
+      {
+        "scheduled_id": "sch-rent",
+        "date": "2026-10-03",
+        "amount": -950.0,
+        "account": "Cuenta corriente",
+        "category": "Alquiler",
+        "payee": "LANDLORD SARL",
+        "memo": null,
+        "frequency": "monthly",
+        "transfer": false
+      },
+      {
+        "scheduled_id": "sch-internet",
+        "date": "2026-10-06",
+        "amount": -29.99,
+        "account": "Cuenta corriente",
+        "category": "Fibra",
+        "payee": "FIBERNET - PRELEV",
+        "memo": null,
+        "frequency": "monthly",
+        "transfer": false
+      },
+      {
+        "scheduled_id": "sch-phone",
+        "date": "2026-10-08",
+        "amount": -19.99,
+        "account": "Cuenta corriente",
+        "category": "Teléfono",
+        "payee": "TELCO MOBILE - PRELEV",
+        "memo": null,
+        "frequency": "monthly",
+        "transfer": false
+      },
+      {
+        "scheduled_id": "sch-power",
+        "date": "2026-10-12",
+        "amount": -64.2,
+        "account": "Cuenta corriente",
+        "category": "Luz",
+        "payee": "POWERCO ENERGIE",
+        "memo": null,
+        "frequency": "monthly",
+        "transfer": false
+      },
+      "… 10 more"
+    ]
+  },
+  "baseline": {
+    "name": "baseline",
+    "months": [
+      {
+        "month": "2026-09",
+        "end": 6334.48,
+        "lowest": 3134.48,
+        "difference": 0.0
+      },
+      {
+        "month": "2026-10",
+        "end": 7460.21,
+        "lowest": 5694.17,
+        "difference": 0.0
+      },
+      {
+        "month": "2026-11",
+        "end": 9005.94,
+        "lowest": 6830.22,
+        "difference": 0.0
+      },
+      {
+        "month": "2026-12",
+        "end": 10071.67,
+        "lowest": 7885.63,
+        "difference": 0.0
+      }
+    ],
+    "difference_at_end": 0.0,
+    "lowest": 3134.48,
+    "lowest_month": "2026-09",
+    "first_shortfall": null,
+    "applied": []
+  },
+  "scenarios": [
+    {
+      "name": "Menos restaurantes, cuota del coche",
+      "months": [
+        {
+          "month": "2026-09",
+          "end": 6338.21,
+          "lowest": 3134.48,
+          "difference": 3.73
+        },
+        {
+          "month": "2026-10",
+          "end": 7486.34,
+          "lowest": 5700.09,
+          "difference": 26.13
+        },
+        {
+          "month": "2026-11",
+          "end": 8604.47,
+          "lowest": 6623.44,
+          "difference": -401.47
+        },
+        {
+          "month": "2026-12",
+          "end": 9242.6,
+          "lowest": 7244.27,
+          "difference": -829.07
+        }
+      ],
+      "difference_at_end": -829.07,
+      "lowest": 3134.48,
+      "lowest_month": "2026-09",
+      "first_shortfall": null,
+      "applied": [
+        {
+          "kind": "change_spending",
+          "subject": "Restaurantes",
+          "total": 70.93,
+          "start": "2026-09",
+          "end": "2026-12",
+          "detail": "Usual spending -112.00 a month (2026-06 to 2026-08), -20 %: +22.40 a month, spread over each month's days; the current month counts for its days left."
+        },
+        {
+          "kind": "add_monthly",
+          "subject": "cuota del coche",
+          "total": -900.0,
+          "start": "2026-11",
+          "end": "2026-12",
+          "detail": "-450.00 on day 5 of each month, from the first one after today."
+        }
+      ]
+    },
+    {
+      "name": "Comprar el coche al contado",
+      "months": [
+        {
+          "month": "2026-09",
+          "end": 6334.48,
+          "lowest": 3134.48,
+          "difference": 0.0
+        },
+        {
+          "month": "2026-10",
+          "end": 7473.7,
+          "lowest": 5694.17,
+          "difference": 13.49
+        },
+        {
+          "month": "2026-11",
+          "end": 32.92,
+          "lowest": -1435.53,
+          "difference": -8973.02
+        },
+        {
+          "month": "2026-12",
+          "end": 1112.14,
+          "lowest": -1087.39,
+          "difference": -8959.53
+        }
+      ],
+      "difference_at_end": -8959.53,
+      "lowest": -1435.53,
+      "lowest_month": "2026-11",
+      "first_shortfall": "2026-11",
+      "applied": [
+        {
+          "kind": "add_one_off",
+          "subject": "coche",
+          "total": -9000.0,
+          "start": "2026-11-15",
+          "end": "2026-11-15",
+          "detail": "-9000.00 on 2026-11-15."
+        },
+        {
+          "kind": "drop_recurring",
+          "subject": "STREAMFLIX",
+          "total": 40.47,
+          "start": "2026-09",
+          "end": "2026-12",
+          "detail": "3 payment(s) of STREAMFLIX left out: +40.47."
+        }
+      ]
+    }
+  ]
+}

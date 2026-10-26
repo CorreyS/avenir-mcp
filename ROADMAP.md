@@ -33,6 +33,11 @@ plan as the existing reports are:
   hold enough in time. *Done.*
 - `get_paycheck_plan`: the bills due before the next paycheck, found from the history's
   rhythm, and how low the checking account gets until then. *Done.*
+- A range around each month-end of `forecast_balance`, from how much the plan's own
+  recent months varied. *Done.*
+- `compare_scenarios`: the balance projected with changes the user is weighing (a
+  category cut, a new monthly payment, a one-off, a cancelled subscription) against the
+  plan as it is, and when each would go below zero. *Done.*
 
 ### Payees named as the user names them
 

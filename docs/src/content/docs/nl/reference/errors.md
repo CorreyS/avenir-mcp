@@ -11,6 +11,22 @@ Een fout komt terug als toolresultaat met `isError`, met een melding die zegt wa
 
 Elke tool die YNAB aanroept, kan de fout van YNAB teruggeven: `Error calling tool '<tool>': YNAB <status>: <detail>` — bijvoorbeeld `YNAB 401` voor een verkeerd of ingetrokken token, `YNAB 429` wanneer de 200 verzoeken per uur op zijn. Een `401`-antwoord bevat de eigen gegevens van avenir-mcp in plaats van die van YNAB: `YNAB 401: the token is invalid or was revoked; create a new Personal Access Token in YNAB's settings.` Wanneer YNAB helemaal niet reageert, geeft het bericht aan of er mogelijk iets is gewijzigd: bij een leesbewerking wordt aangegeven dat YNAB niet bereikbaar was en dat er niets is gewijzigd, terwijl bij een schrijfbewerking die al is verzonden wordt aangegeven dat de wijziging mogelijk wel of niet is doorgevoerd en dat dit moet worden gecontroleerd voordat er opnieuw een poging wordt ondernomen. Zonder `YNAB_API_KEY` weigert de server YNAB aan te roepen: `YNAB_API_KEY environment variable is not set`.
 
+## [`compare_scenarios`](/avenir-mcp/nl/reference/tools/compare-scenarios/)
+
+- `until must be the current month or later.`
+- `until must be at most 24 months ahead.`
+- `until must be a month as YYYY-MM, got '{until}'.`
+- `Scenario names must differ: '{name}' is given twice.`
+- `end {end} comes before start {start}.`
+- `date must be after today and by the end of {until}, got {when}.`
+- `start and end must be months from {current} to {until}, got {value}.`
+- `Unknown account(s) {unknown}: use ids from list_accounts.`
+- `{kind} needs {missing}.`
+- `{kind} does not take {extra}.`
+- `change_spending needs percent or monthly_spending, not both.`
+- `No recurring charge or scheduled payment matches '{payee}': the projection's charges are {', '.join(known) or 'none'}.`
+- `Unknown category or group '{wanted}': give a name or id as get_category_balances or list_category_groups shows it.`
+
 ## [`find_transactions`](/avenir-mcp/nl/reference/tools/find-transactions/)
 
 - `Account {0} is not in this plan: use an id from list_accounts.`
@@ -20,10 +36,10 @@ Elke tool die YNAB aanroept, kan de fout van YNAB teruggeven: `Error calling too
 
 ## [`forecast_balance`](/avenir-mcp/nl/reference/tools/forecast-balance/)
 
-- `Unknown account(s) {unknown}: use ids from list_accounts.`
 - `until must be the current month or later.`
 - `until must be at most 24 months ahead.`
 - `until must be a month as YYYY-MM, got '{until}'.`
+- `Unknown account(s) {unknown}: use ids from list_accounts.`
 
 ## [`get_budget_vs_actual`](/avenir-mcp/nl/reference/tools/get-budget-vs-actual/)
 

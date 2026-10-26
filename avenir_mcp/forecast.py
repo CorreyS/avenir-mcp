@@ -5,15 +5,18 @@
 
 Three sources, each an assumption the caller can see and change: charges that
 recur in the history, the average of everything else, and what the caller
-expects (monthly income, one-off amounts). Sums are made in milliunits.
+expects (monthly income, one-off amounts). How much everything else varied from
+month to month gives each month-end a range. Sums are made in milliunits.
 """
 
 from __future__ import annotations
 
 import calendar
+import math
 import re
 import statistics
 from collections import defaultdict
+from collections.abc import Mapping
 from datetime import date
 from typing import Any
 
@@ -71,6 +74,12 @@ class MonthProjection(Model):
     """Projected balance at the end of the month."""
     lowest: float
     """Lowest projected balance within the month, day by day."""
+    end_low: float | None = None
+    """Low end of the range around `end`: one deviation below it (see band); null when
+    the history is too short to make a range."""
+    end_high: float | None = None
+    """High end of the range around `end`: one deviation above it; null when the history
+    is too short to make a range."""
 
 
 class Projection(Model):
@@ -80,6 +89,21 @@ class Projection(Model):
     """One projection per month, from the current month to the horizon."""
     first_shortfall: str | None
     """First month whose lowest balance is below zero; null if none."""
+
+
+class Band(Model):
+    """How far each month-end could stray from the projection, from how the past months did."""
+
+    deviation: float | None
+    """One standard deviation of a month's other spending and income, net, over the months
+    measured, in currency units; null when the history is too short."""
+    months: list[str]
+    """The complete months measured, YYYY-MM, oldest first."""
+    first_possible_shortfall: str | None
+    """First month whose lowest balance, less the range's half-width at its end, is below
+    zero: the balance could go below zero as early as this; null if none or no range."""
+    note: str
+    """How the range was made, or why there is none, for the agent to relay."""
 
 
 def months_before(today: date, count: int) -> list[str]:
@@ -258,6 +282,41 @@ def is_scheduled(payee: str, outflow: bool, scheduled: frozenset[tuple[str, bool
     )
 
 
+def _other_totals(
+    transactions: list[dict[str, Any]],
+    today: date,
+    known: list[Recurring],
+    outflow: bool,
+    also: frozenset[tuple[str, bool]] = frozenset(),
+) -> dict[str, int]:
+    """Sum one direction of money per month over the last 3 full months, recurring amounts excluded.
+
+    Args:
+        transactions: The plan's transactions, amounts in milliunits.
+        today: The day the forecast is made.
+        known: Recurring amounts found by :func:`recurring`, left out of the sums.
+        outflow: True for money out, False for money in.
+        also: Other (normalised payee, is money out) pairs to leave out, e.g. the
+            payees of scheduled transactions, which are projected apart.
+
+    Returns:
+        The milliunits of each month, YYYY-MM; a month with nothing is absent.
+    """
+    months = set(months_before(today, VARIABLE_MONTHS))
+    recurring_payees = {r.payee for r in known if _is_outflow(r.amount) == outflow}
+    totals: dict[str, int] = defaultdict(int)
+    for tx in transactions:
+        if (
+            usable(tx)
+            and _is_outflow(tx["amount"]) == outflow
+            and tx["date"][:7] in months
+            and _merchant(tx) not in recurring_payees
+            and not is_scheduled(_merchant(tx), outflow, also)
+        ):
+            totals[tx["date"][:7]] += tx["amount"]
+    return totals
+
+
 def _other_average(
     transactions: list[dict[str, Any]],
     today: date,
@@ -278,17 +337,7 @@ def _other_average(
     Returns:
         The monthly average in currency units, negative for money out.
     """
-    months = set(months_before(today, VARIABLE_MONTHS))
-    recurring_payees = {r.payee for r in known if _is_outflow(r.amount) == outflow}
-    total = sum(
-        tx["amount"]
-        for tx in transactions
-        if usable(tx)
-        and _is_outflow(tx["amount"]) == outflow
-        and tx["date"][:7] in months
-        and _merchant(tx) not in recurring_payees
-        and not is_scheduled(_merchant(tx), outflow, also)
-    )
+    total = sum(_other_totals(transactions, today, known, outflow, also).values())
     return milliunit_to_amount(round(total / VARIABLE_MONTHS))
 
 
@@ -368,7 +417,7 @@ def month_to_date(
     return milliunit_to_amount(spent), milliunit_to_amount(received)
 
 
-def _horizon(today: date, until: str) -> list[tuple[int, int]]:
+def horizon(today: date, until: str) -> list[tuple[int, int]]:
     """List the months from today's month to the horizon.
 
     Args:
@@ -480,6 +529,7 @@ def project(  # pylint: disable=too-many-arguments,too-many-locals
     one_offs: list[OneOff],
     spent_this_month: float = 0.0,
     received_this_month: float = 0.0,
+    monthly_changes: Mapping[str, float] | None = None,
 ) -> Projection:
     """Walk day by day from tomorrow to the end of `until` ("YYYY-MM").
 
@@ -499,6 +549,8 @@ def project(  # pylint: disable=too-many-arguments,too-many-locals
         one_offs: Amounts expected once, on their dates.
         spent_this_month: Already spent since the 1st, negative.
         received_this_month: Already received since the 1st.
+        monthly_changes: Amounts by month, YYYY-MM, spread evenly over the days of the
+            month still to project, such as a what-if change to a category's spending.
 
     Returns:
         The projected months and the first one whose lowest balance is below zero.
@@ -506,9 +558,10 @@ def project(  # pylint: disable=too-many-arguments,too-many-locals
     balance = amount_to_milliunit(start_balance)
     variable = amount_to_milliunit(variable_monthly)
     income = amount_to_milliunit(monthly_income)
+    changes = monthly_changes or {}
     months: list[MonthProjection] = []
     first_shortfall = None
-    for year, month in _horizon(today, until):
+    for year, month in horizon(today, until):
         days = calendar.monthrange(year, month)[1]
         current = (year, month) == (today.year, today.month)
         label = f"{year:04d}-{month:02d}"
@@ -526,9 +579,150 @@ def project(  # pylint: disable=too-many-arguments,too-many-locals
             _spread(to_spend, first_day, days),
             _spread(to_receive, first_day, days),
             _dated(recurring, one_offs, label=label, first_day=first_day, days=days, today=today),
+            _spread(amount_to_milliunit(changes.get(label, 0.0)), first_day, days),
         ]
         projection, balance = _walk(label, balance, first_day, days, daily)
         months.append(projection)
         if projection.lowest < 0 and first_shortfall is None:
             first_shortfall = label
     return Projection(months=months, first_shortfall=first_shortfall)
+
+
+def _half_width(deviation: float, months: float) -> int:
+    """Say how far a balance strays after some months, at one deviation a month.
+
+    Args:
+        deviation: One standard deviation of a month, in milliunits.
+        months: Months projected so far; a share of one for the current month.
+
+    Returns:
+        The half-width of the range, in milliunits, in whole cents.
+    """
+    # Months stray independently (√months), and the average itself rests on only
+    # VARIABLE_MONTHS months, so its own error repeats every month (months / √n).
+    spread = deviation * math.sqrt(months + months**2 / VARIABLE_MONTHS)
+    return round(spread / 10) * 10
+
+
+def band(  # pylint: disable=too-many-arguments
+    projection: Projection,
+    transactions: list[dict[str, Any]],
+    today: date,
+    known: list[Recurring],
+    *,
+    also: frozenset[tuple[str, bool]] = frozenset(),
+    with_income: bool = True,
+) -> tuple[Projection, Band]:
+    """Give each projected month-end a range, from how much the last full months varied.
+
+    The averages the projection spreads over the days are those of the last 3 full
+    months. How far each of those months strayed from them, other spending and income
+    together (net), gives one standard deviation s (sample, n - 1). After H months
+    projected, the current month counted for the share of its days still to come, the
+    balance strays by s * sqrt(H + H^2 / n): sqrt(H) because months stray independently
+    of one another, and H / sqrt(n) because the average itself rests on only n = 3
+    months, so its error repeats every month. The range is one such deviation either
+    side of each month-end: a typical gap, not a worst case. Recurring charges,
+    schedules and one-offs count as certain, and income too when the caller gives it.
+
+    Args:
+        projection: The projection, from :func:`project`.
+        transactions: The plan's transactions, amounts in milliunits.
+        today: The day the forecast is made.
+        known: Recurring amounts found by :func:`recurring`, left out of the measure.
+        also: Other (normalised payee, is money out) pairs to leave out, e.g. the
+            payees of scheduled transactions, which are projected apart.
+        with_income: False when the caller gave the income: only spending strays.
+
+    Returns:
+        The projection with end_low and end_high on each month, and how they were made;
+        with fewer than 3 full months of history, the projection as it was and a band
+        saying why it has no range.
+    """
+    months = months_before(today, VARIABLE_MONTHS)
+    # Any text sorting after a YYYY-MM month keeps every month out when no transaction
+    # is usable at all.
+    first = min((tx["date"][:7] for tx in transactions if usable(tx)), default="9999-12")
+    held = [month for month in months if month >= first]
+    if len(held) < VARIABLE_MONTHS:
+        return projection, Band(
+            deviation=None,
+            months=held,
+            first_possible_shortfall=None,
+            note=(
+                f"No range: it needs the last {VARIABLE_MONTHS} complete months of history, "
+                f"and these accounts hold {len(held)}; end_low and end_high are null."
+            ),
+        )
+    spent = _other_totals(transactions, today, known, True, also)
+    received = _other_totals(transactions, today, known, False, also) if with_income else {}
+    deviation = statistics.stdev(spent.get(m, 0) + received.get(m, 0) for m in months)
+    banded, first_possible = _banded(projection, today, deviation)
+    rounded = milliunit_to_amount(round(deviation / 10) * 10)
+    return banded, Band(
+        deviation=rounded,
+        months=months,
+        first_possible_shortfall=first_possible,
+        note=_band_note(rounded, months, with_income),
+    )
+
+
+def _band_note(deviation: float, months: list[str], with_income: bool) -> str:
+    """Say how the range was made, for the agent to relay.
+
+    Args:
+        deviation: One standard deviation of a month, in currency units.
+        months: The months measured, oldest first.
+        with_income: False when the caller gave the income.
+
+    Returns:
+        The note, two sentences.
+    """
+    measured = "spending and income" if with_income else "spending"
+    certain = (
+        "schedules and one-offs" if with_income else "schedules, one-offs and the income given"
+    )
+    how = (
+        f"one standard deviation ({deviation:.2f} a month) of the other {measured} of "
+        f"{months[0]} to {months[-1]}, carried over the months projected, so the range widens "
+        "with each month"
+        if deviation
+        else f"equal to end, since the other {measured} of {months[0]} to {months[-1]} did not "
+        "vary from month to month"
+    )
+    return (
+        f"end_low and end_high: {how}. Recurring charges, {certain} count as certain: a "
+        "typical gap, not a worst case."
+    )
+
+
+def _banded(projection: Projection, today: date, deviation: float) -> tuple[Projection, str | None]:
+    """Put a range around each month-end, at one deviation a month carried over the months.
+
+    Args:
+        projection: The projection, from :func:`project`.
+        today: The day the forecast is made; its month counts for the days left.
+        deviation: One standard deviation of a month, in milliunits.
+
+    Returns:
+        The projection with end_low and end_high, and the first month whose lowest
+        balance less the range's half-width is below zero, or None.
+    """
+    days = calendar.monthrange(today.year, today.month)[1]
+    share = (days - today.day) / days
+    months: list[MonthProjection] = []
+    first_possible = None
+    for index, month in enumerate(projection.months):
+        half = _half_width(deviation, share + index)
+        end = amount_to_milliunit(month.end)
+        months.append(
+            month.model_copy(
+                update={
+                    "end_low": milliunit_to_amount(end - half),
+                    "end_high": milliunit_to_amount(end + half),
+                }
+            )
+        )
+        if first_possible is None and amount_to_milliunit(month.lowest) - half < 0:
+            first_possible = month.month
+    return projection.model_copy(update={"months": months}), first_possible

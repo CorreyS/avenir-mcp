@@ -1,14 +1,19 @@
 # SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
 # SPDX-License-Identifier: MIT
 
-"""Account-level tools: reconcile with the bank, forecast the balance."""
+"""Account-level tools: reconcile with the bank, forecast the balance.
+
+The projection forecast_balance makes is gathered by forecast_basis, which
+compare_scenarios shares to project the same baseline with what-if changes.
+"""
 
 from __future__ import annotations
 
 import calendar
 import logging
+from collections.abc import Mapping
 from datetime import date, timedelta
-from typing import Literal
+from typing import Any, Literal
 
 from fastmcp import Context
 from fastmcp.exceptions import ToolError
@@ -234,9 +239,35 @@ class ForecastResult(Model):
     """The projected months."""
     first_shortfall: str | None
     """First month whose lowest balance is below zero; null if none."""
+    band: forecast.Band
+    """How the range around each month-end (end_low, end_high) was made, or why there is
+    none, and the first month the balance could go below zero within it."""
 
 
-def _check_horizon(until: str, now: date) -> None:
+class ForecastBasis(Model):
+    """What a projection of the chosen accounts rests on, before any what-if."""
+
+    today: date
+    """The day of the question."""
+    accounts: list[str]
+    """Names of the accounts projected together."""
+    start_balance: float
+    """Their total balance today."""
+    assumptions: ForecastAssumptions
+    """Everything the projection assumes."""
+    history: list[dict[str, Any]]
+    """The accounts' transactions, amounts in milliunits."""
+    categories: list[dict[str, Any]]
+    """The plan's categories."""
+    planned: frozenset[tuple[str, bool]]
+    """(normalised payee, is money out) of the schedules, projected apart."""
+    spent: float
+    """Spent since the 1st, outside recurring and scheduled payees, negative."""
+    received: float
+    """Received since the 1st, outside recurring and scheduled payees."""
+
+
+def check_horizon(until: str, now: date) -> None:
     """Refuse a forecast horizon that is malformed, past, or too far ahead.
 
     Args:
@@ -267,7 +298,7 @@ def _check_horizon(until: str, now: date) -> None:
         "open_world_hint": True,
     }
 )
-async def forecast_balance(  # pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-locals
+async def forecast_balance(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     plan_id: str,
     until: str,
     account_ids: list[str] | None = None,
@@ -290,9 +321,18 @@ async def forecast_balance(  # pylint: disable=too-many-arguments,too-many-posit
     include one-off money such as capital injections) and one-off amounts such as
     a tax bill (negative) or a refund (positive). Amounts in currency units.
     `lowest` is the lowest point within a month; `first_shortfall` is the first
-    month it goes below zero. For a month already gone use get_monthly_summary, or
-    get_spending_trends to compare several; for how long today's money would last
-    with no income at all, get_runway. Changes nothing.
+    month it goes below zero. `end_low` and `end_high` give each month-end a range:
+    one standard deviation of how far the last 3 full months' other spending and
+    income (spending alone when you pass monthly_income) strayed from their average,
+    widening with each month projected. It is a typical gap, not a worst case;
+    `band.first_possible_shortfall` is the first month the balance could go below
+    zero within it, and `band.note` says how it was made, or why the bounds are null
+    (fewer than 3 full months of history). For a month already gone use
+    get_monthly_summary, or get_spending_trends to compare several; for how long
+    today's money would last with no income at all, get_runway; for what-ifs (a
+    category cut, a new monthly payment, a cancelled subscription), compare_scenarios.
+    Four YNAB requests (accounts, transactions, scheduled transactions, categories);
+    changes nothing.
 
     Args:
         plan_id: YNAB plan id or 'last-used'.
@@ -314,8 +354,68 @@ async def forecast_balance(  # pylint: disable=too-many-arguments,too-many-posit
         ToolError: If until is malformed, in the past or too far ahead, or an account is unknown.
     """
     logger.info("Tool called: forecast_balance")
+    check_horizon(until, app.today())
+    basis = await forecast_basis(
+        plan_id,
+        until,
+        account_ids=account_ids,
+        monthly_income=monthly_income,
+        variable_monthly=variable_monthly,
+        one_offs=one_offs,
+    )
+    projection, band = forecast.band(
+        projected(basis, until),
+        basis.history,
+        basis.today,
+        basis.assumptions.recurring,
+        also=basis.planned,
+        with_income=monthly_income is None,
+    )
+    shortfall = projection.first_shortfall
+    message = (
+        f"The balance goes below zero in {shortfall}."
+        if shortfall
+        else f"The balance stays above zero until {until}."
+    ) + " This rests on the assumptions listed: check them with the user."
+    return ForecastResult(
+        message=message,
+        accounts=basis.accounts,
+        start_balance=basis.start_balance,
+        assumptions=basis.assumptions,
+        months=projection.months,
+        first_shortfall=shortfall,
+        band=band,
+    )
+
+
+async def forecast_basis(  # pylint: disable=too-many-arguments,too-many-locals
+    plan_id: str,
+    until: str,
+    *,
+    account_ids: list[str] | None,
+    monthly_income: float | None,
+    variable_monthly: float | None,
+    one_offs: list[forecast.OneOff] | None,
+) -> ForecastBasis:
+    """Gather what a projection of the chosen accounts rests on, in four YNAB requests.
+
+    Args:
+        plan_id: YNAB plan id or 'last-used'.
+        until: Last month to project, YYYY-MM, already checked.
+        account_ids: Accounts to include; None for all open on-budget accounts.
+        monthly_income: Income expected each month, replacing what the history and the
+            schedules show; None to take theirs.
+        variable_monthly: Monthly spending besides recurring charges, negative; None for
+            the last 3 months' average.
+        one_offs: Expected one-off amounts, or None.
+
+    Returns:
+        The accounts, their balance today, the assumptions and the history.
+
+    Raises:
+        ToolError: If an account is unknown.
+    """
     now = app.today()
-    _check_horizon(until, now)
     accounts = await client.get_accounts(plan_id)
     if account_ids is not None:
         unknown = sorted(set(account_ids) - {a["id"] for a in accounts})
@@ -340,10 +440,11 @@ async def forecast_balance(  # pylint: disable=too-many-arguments,too-many-posit
         (normalize_payee(item.get("payee_name") or ""), item["amount"] < 0) for item in plans
     )
     year, month = (int(part) for part in until.split("-"))
+    categories = await client.get_categories(plan_id)
     upcoming = schedule.occurrences(
         plans,
         {a["id"]: a["name"] for a in accounts},
-        {c["id"]: c["name"] for c in await client.get_categories(plan_id)},
+        {c["id"]: c["name"] for c in categories},
         now + timedelta(days=1),
         date(year, month, calendar.monthrange(year, month)[1]),
     )
@@ -369,29 +470,8 @@ async def forecast_balance(  # pylint: disable=too-many-arguments,too-many-posit
         sum(client.amount_to_milliunit(a["balance"]) for a in chosen)
     )
     spent, received = forecast.month_to_date(history, now, charges, also=planned)
-    projection = forecast.project(
-        start_balance=start,
+    return ForecastBasis(
         today=now,
-        until=until,
-        recurring=charges,
-        variable_monthly=variable,
-        monthly_income=income,
-        one_offs=(one_offs or [])
-        + [
-            forecast.OneOff(date=date.fromisoformat(o.date), amount=o.amount, label=o.payee)
-            for o in upcoming
-        ],
-        spent_this_month=spent,
-        received_this_month=received,
-    )
-    shortfall = projection.first_shortfall
-    message = (
-        f"The balance goes below zero in {shortfall}."
-        if shortfall
-        else f"The balance stays above zero until {until}."
-    ) + " This rests on the assumptions listed: check them with the user."
-    return ForecastResult(
-        message=message,
         accounts=[a["name"] for a in chosen],
         start_balance=start,
         assumptions=ForecastAssumptions(
@@ -401,8 +481,49 @@ async def forecast_balance(  # pylint: disable=too-many-arguments,too-many-posit
             one_offs=one_offs or [],
             scheduled=upcoming,
         ),
-        months=projection.months,
-        first_shortfall=shortfall,
+        history=history,
+        categories=categories,
+        planned=planned,
+        spent=spent,
+        received=received,
+    )
+
+
+def projected(
+    basis: ForecastBasis,
+    until: str,
+    *,
+    one_offs: list[forecast.OneOff] | None = None,
+    monthly_changes: Mapping[str, float] | None = None,
+) -> forecast.Projection:
+    """Project the balance on a basis, with what-if amounts added if any.
+
+    Args:
+        basis: What the projection rests on, from forecast_basis.
+        until: Last month to project, YYYY-MM.
+        one_offs: More amounts on their dates, besides the basis's own.
+        monthly_changes: Amounts by month, YYYY-MM, spread over its days left.
+
+    Returns:
+        The projected months and the first one whose lowest balance is below zero.
+    """
+    assumptions = basis.assumptions
+    return forecast.project(
+        start_balance=basis.start_balance,
+        today=basis.today,
+        until=until,
+        recurring=assumptions.recurring,
+        variable_monthly=assumptions.variable_monthly,
+        monthly_income=assumptions.monthly_income,
+        one_offs=assumptions.one_offs
+        + [
+            forecast.OneOff(date=date.fromisoformat(o.date), amount=o.amount, label=o.payee)
+            for o in assumptions.scheduled
+        ]
+        + (one_offs or []),
+        spent_this_month=basis.spent,
+        received_this_month=basis.received,
+        monthly_changes=monthly_changes,
     )
 
 

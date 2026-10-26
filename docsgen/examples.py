@@ -65,6 +65,10 @@ _APPLY = {
 _TYPED: dict[str, dict[str, str]] = {
     "fr": {
         "Bills": "Charges fixes",
+        "Buy the car outright": "Acheter la voiture comptant",
+        "car": "voiture",
+        "car payment": "crédit auto",
+        "Cut restaurants, add a car": "Moins de restaurants, un crédit auto",
         "Everyday": "Quotidien",
         "not imported by the bank": "non importé par la banque",
         "Pets": "Animaux",
@@ -72,13 +76,22 @@ _TYPED: dict[str, dict[str, str]] = {
     },
     "es": {
         "Bills": "Facturas",
+        "Buy the car outright": "Comprar el coche al contado",
+        "car": "coche",
+        "car payment": "cuota del coche",
+        "Cut restaurants, add a car": "Menos restaurantes, cuota del coche",
         "Everyday": "Día a día",
         "not imported by the bank": "no importado por el banco",
         "Pets": "Mascotas",
+        "Restaurants": "Restaurantes",
         "Sport": "Deporte",
     },
     "de": {
         "Bills": "Fixkosten",
+        "Buy the car outright": "Das Auto bar kaufen",
+        "car": "Auto",
+        "car payment": "Autorate",
+        "Cut restaurants, add a car": "Weniger Restaurants, Autorate",
         "Everyday": "Alltag",
         "not imported by the bank": "nicht von der Bank importiert",
         "Pets": "Haustiere",
@@ -86,6 +99,10 @@ _TYPED: dict[str, dict[str, str]] = {
     },
     "nl": {
         "Bills": "Vaste lasten",
+        "Buy the car outright": "De auto contant kopen",
+        "car": "auto",
+        "car payment": "autolening",
+        "Cut restaurants, add a car": "Minder restaurants, autolening",
         "Everyday": "Dagelijks",
         "not imported by the bank": "niet door de bank geïmporteerd",
         "Pets": "Huisdieren",
@@ -182,6 +199,44 @@ CALLS: list[Call] = [
         "forecast_balance",
         {"plan_id": BUDGET, "until": "2026-12", "monthly_income": 3200},
         6,
+    ),
+    # Restaurants down by a fifth and a car payment from November, against buying the car
+    # outright in November and cancelling the streaming subscription.
+    Call(
+        "scenarios",
+        "compare_scenarios",
+        {
+            "plan_id": BUDGET,
+            "until": "2026-12",
+            "monthly_income": 3200,
+            "scenarios": [
+                {
+                    "name": "Cut restaurants, add a car",
+                    "adjustments": [
+                        {"kind": "change_spending", "category": "Restaurants", "percent": -20},
+                        {
+                            "kind": "add_monthly",
+                            "amount": -450,
+                            "start": "2026-11",
+                            "day": 5,
+                            "label": "car payment",
+                        },
+                    ],
+                },
+                {
+                    "name": "Buy the car outright",
+                    "adjustments": [
+                        {
+                            "kind": "add_one_off",
+                            "amount": -9000,
+                            "date": "2026-11-15",
+                            "label": "car",
+                        },
+                        {"kind": "drop_recurring", "payee": "Streamflix"},
+                    ],
+                },
+            ],
+        },
     ),
     Call(
         "budget_preview",

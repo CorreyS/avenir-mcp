@@ -110,6 +110,46 @@ def test_projected_months_follow_on_and_add_up(
     assert projection.first_shortfall == (shortfalls[0] if shortfalls else None)
 
 
+@settings(max_examples=200)
+@given(
+    start=st.integers(min_value=-10_000_000, max_value=10_000_000),
+    flows=st.lists(st.integers(min_value=-500_000, max_value=500_000), min_size=3, max_size=3),
+    today=st.dates(min_value=date(2026, 1, 1), max_value=date(2027, 12, 31)),
+    months=st.integers(min_value=0, max_value=24),
+    with_income=st.booleans(),
+)
+def test_every_month_end_lies_in_its_range_and_the_range_never_narrows(
+    start: int, flows: list[int], today: date, months: int, with_income: bool
+) -> None:
+    """end_low <= end <= end_high, the same distance either side, wider month after month."""
+    history = [
+        {"payee_name": f"OTHER {month}", "amount": cents * 10, "date": f"{month}-10"}
+        for month, cents in zip(forecast.months_before(today, 3), flows, strict=True)
+    ]
+    until = today.replace(day=1) + timedelta(days=31 * months)
+    projection = forecast.project(
+        start_balance=start / 100,
+        today=today,
+        until=f"{until:%Y-%m}",
+        recurring=[],
+        variable_monthly=forecast.variable_average(history, today, []),
+        monthly_income=forecast.income_average(history, today, []),
+        one_offs=[],
+    )
+    banded, band = forecast.band(projection, history, today, [], with_income=with_income)
+    assert band.deviation is not None and band.deviation >= 0
+    halves = []
+    for plain, month in zip(projection.months, banded.months, strict=True):
+        assert month.end == plain.end
+        assert month.end_low is not None and month.end_high is not None
+        assert month.end_low <= month.end <= month.end_high
+        assert round(month.end - month.end_low, 2) == round(month.end_high - month.end, 2)
+        halves.append(round(month.end_high - month.end, 2))
+    assert halves == sorted(halves)
+    lows = [m.month for m, half in zip(banded.months, halves) if round(m.lowest - half, 2) < 0]
+    assert band.first_possible_shortfall == (lows[0] if lows else None)
+
+
 # ---------------------------------------------------------------------------
 # Pagination cursors
 # ---------------------------------------------------------------------------

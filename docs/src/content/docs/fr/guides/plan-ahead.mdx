@@ -15,6 +15,7 @@ import pace from '@snippets/fr/category_pace.json?raw';
 import goal from '@snippets/fr/goal_projection.json?raw';
 import upcomingExpenses from '@snippets/fr/upcoming_expenses.json?raw';
 import paycheckPlan from '@snippets/fr/paycheck_plan.json?raw';
+import scenarios from '@snippets/fr/scenarios.json?raw';
 
 **Objectif :** savoir si l'argent tiendra, et quand il manquerait, avant que ça arrive.
 
@@ -71,6 +72,14 @@ Détails : [Prévision](/avenir-mcp/fr/concepts/forecasting/).
 - `months[].lowest` : le point le plus bas du mois, jour par jour — celui qui dit si un
   prélèvement serait rejeté.
 - `first_shortfall` : le premier mois dont le point bas est sous zéro, ou `null`.
+- `months[].end_low`, `end_high` : une fourchette autour de chaque fin de mois, d'un
+  écart-type de ce dont les autres dépenses (et les revenus, sauf si vous les donnez) des 3
+  derniers mois complets se sont écartées de leur moyenne, qui s'élargit de mois en mois.
+  Dans le budget de démonstration, dont les autres dépenses n'ont pas varié, elles valent
+  `end`. `band.note` dit comment la fourchette a été faite, ou pourquoi il n'y en a pas
+  (moins de 3 mois complets d'historique).
+- `band.first_possible_shortfall` : le premier mois où le solde pourrait passer sous zéro
+  dans cette fourchette, ou `null`.
 
 <Aside type="caution" title="Une projection, pas une prédiction">
 Elle prolonge vos derniers mois. Des vacances, un impôt annuel ou un achat ponctuel dans
@@ -175,6 +184,7 @@ aujourd'hui, 2 000 sont atteints en mars 2027, et 171,43 par mois suffiraient po
 cette date.
 
 <Code code={goal} lang="json" title="get_goal_projection" />
+
 ## Les factures qui ne reviennent pas chaque mois
 
 Demandez *« quelles grosses factures arrivent cette année, et suis-je prêt ? »* :
@@ -209,6 +219,30 @@ rien à payer avant, et les factures d'octobre laissent le compte courant à 3 4
 bas, le 24.
 
 <Code code={paycheckPlan} lang="json" title="get_paycheck_plan (extrait)" />
+
+## Et si… ?
+
+Demandez *« et si on réduisait les restaurants de 20 % et qu'on ajoutait un crédit auto de
+450 à partir de novembre, ou qu'on achetait la voiture comptant ? »* : `compare_scenarios`
+fait la même projection que `forecast_balance`, avec les mêmes arguments, comme référence,
+puis celle de chaque scénario (4 au plus), une liste nommée d'ajustements :
+
+| Ajustement | Ce qu'il change |
+|---|---|
+| `change_spending` | la dépense mensuelle habituelle d'une catégorie ou d'un groupe, la moyenne des 3 derniers mois complets, de `percent` ou jusqu'à `monthly_spending`, répartie sur les jours de chaque mois |
+| `add_monthly` | un montant le `day` de chaque mois à partir de `start` (jusqu'à `end`) : une nouvelle charge, ou un revenu |
+| `add_one_off` | un montant une seule fois, à la `date` |
+| `drop_recurring` | une charge récurrente ou un paiement planifié qui n'est plus payé à partir de `start`, trouvé par un mot de son `payee` |
+
+Chaque scénario revient mois par mois, avec sa `difference` par rapport à la référence,
+l'écart à la fin, son solde le plus bas et le mois, le premier mois sous zéro et la façon
+dont chaque ajustement a été appliqué. Ici les restaurants coûtent 112,00 par mois : un
+cinquième de moins laisse 22,40 par mois ; avec le crédit auto à partir de novembre, le
+solde est inférieur de 829,07 en décembre. Acheter la voiture comptant le 15 novembre le
+fait passer sous zéro ce mois-là, à −1 435,53, même sans Streamflix. Quatre requêtes YNAB,
+quel que soit le nombre de scénarios.
+
+<Code code={scenarios} lang="json" title="compare_scenarios (extrait)" />
 
 ## Puis préparer le mois suivant
 

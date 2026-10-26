@@ -15,6 +15,7 @@ import pace from '@snippets/de/category_pace.json?raw';
 import goal from '@snippets/de/goal_projection.json?raw';
 import upcomingExpenses from '@snippets/de/upcoming_expenses.json?raw';
 import paycheckPlan from '@snippets/de/paycheck_plan.json?raw';
+import scenarios from '@snippets/de/scenarios.json?raw';
 
 **Ziel:** wissen, ob das Geld reicht und wann es ausgehen würde, bevor es so weit ist.
 
@@ -71,6 +72,14 @@ Einzelheiten: [Prognose](/avenir-mcp/de/concepts/forecasting/).
 - `months[].lowest`: der Tiefpunkt innerhalb des Monats, Tag für Tag – der, der Ihnen
   sagt, ob eine Zahlung platzen würde.
 - `first_shortfall`: der erste Monat, dessen Tiefpunkt unter null liegt, oder `null`.
+- `months[].end_low`, `end_high`: eine Spanne um jedes Monatsende, eine
+  Standardabweichung dessen, wie weit die übrigen Ausgaben (und die Einnahmen, außer Sie
+  geben sie vor) der letzten 3 vollen Monate von ihrem Durchschnitt abwichen; sie wird von
+  Monat zu Monat breiter. Im Demo-Budget, dessen übrige Ausgaben nicht schwankten, sind sie
+  gleich `end`. `band.note` sagt, wie die Spanne entstand, oder warum es keine gibt (weniger
+  als 3 volle Monate Verlauf).
+- `band.first_possible_shortfall`: der erste Monat, in dem der Kontostand innerhalb dieser
+  Spanne unter null fallen könnte, oder `null`.
 
 <Aside type="caution" title="Eine Hochrechnung, keine Vorhersage">
 Sie schreibt Ihre letzten Monate fort. Ein Urlaub, eine jährliche Steuer oder ein
@@ -177,6 +186,7 @@ heute enthält, sind 2.000 im März 2027 erreicht, und 171,43 im Monat würden r
 bis dahin dort zu sein.
 
 <Code code={goal} lang="json" title="get_goal_projection" />
+
 ## Die Rechnungen, die nicht jeden Monat kommen
 
 Fragen Sie *„Welche großen Rechnungen kommen dieses Jahr, und bin ich bereit?“*:
@@ -211,6 +221,30 @@ Gehalt am 28., ohne dass vorher etwas fällig ist, und die Rechnungen im Oktober
 Girokonto am 24. auf seinen Tiefpunkt von 3.460,21 sinken.
 
 <Code code={paycheckPlan} lang="json" title="get_paycheck_plan (Auszug)" />
+
+## Was wäre, wenn?
+
+Fragen Sie *„was, wenn wir 20 % weniger für Restaurants ausgeben und ab November eine
+Autorate von 450 dazukommt, oder wir das Auto bar kaufen?“*: `compare_scenarios` macht
+dieselbe Prognose wie `forecast_balance`, mit denselben Argumenten, als Basis, dann die
+Prognose jedes Szenarios (höchstens 4), einer benannten Liste von Anpassungen:
+
+| Anpassung | Was sie ändert |
+|---|---|
+| `change_spending` | die übliche Monatsausgabe einer Kategorie oder Gruppe, den Durchschnitt der letzten 3 vollen Monate, um `percent` oder auf `monthly_spending`, verteilt auf die Tage jedes Monats |
+| `add_monthly` | einen Betrag am `day` jedes Monats ab `start` (bis `end`): eine neue Belastung oder eine Einnahme |
+| `add_one_off` | einen Betrag einmal, am `date` |
+| `drop_recurring` | eine wiederkehrende Belastung oder geplante Zahlung, die ab `start` nicht mehr anfällt, gefunden über ein Wort ihres `payee` |
+
+Jedes Szenario kommt Monat für Monat zurück, mit seiner `difference` zur Basis, der
+Differenz am Ende, seinem Tiefststand und dessen Monat, dem ersten Monat unter null und
+wie jede Anpassung angewandt wurde. Hier kosten Restaurants 112,00 im Monat: ein Fünftel
+weniger lässt 22,40 im Monat übrig; mit der Autorate ab November liegt der Kontostand im
+Dezember um 829,07 niedriger. Das Auto am 15. November bar zu kaufen, bringt ihn in diesem
+Monat unter null, auf −1.435,53, auch ohne Streamflix. Vier YNAB-Anfragen, gleich wie
+viele Szenarien.
+
+<Code code={scenarios} lang="json" title="compare_scenarios (Auszug)" />
 
 ## Dann den nächsten Monat budgetieren
 
