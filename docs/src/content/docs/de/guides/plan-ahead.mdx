@@ -13,6 +13,8 @@ import runway from '@snippets/de/runway.json?raw';
 import debtPayoff from '@snippets/de/debt_payoff.json?raw';
 import pace from '@snippets/de/category_pace.json?raw';
 import goal from '@snippets/de/goal_projection.json?raw';
+import upcomingExpenses from '@snippets/de/upcoming_expenses.json?raw';
+import paycheckPlan from '@snippets/de/paycheck_plan.json?raw';
 
 **Ziel:** wissen, ob das Geld reicht und wann es ausgehen würde, bevor es so weit ist.
 
@@ -175,6 +177,40 @@ heute enthält, sind 2.000 im März 2027 erreicht, und 171,43 im Monat würden r
 bis dahin dort zu sein.
 
 <Code code={goal} lang="json" title="get_goal_projection" />
+## Die Rechnungen, die nicht jeden Monat kommen
+
+Fragen Sie *„Welche großen Rechnungen kommen dieses Jahr, und bin ich bereit?“*:
+`get_upcoming_expenses` listet Monat für Monat die Rechnungen, die seltener als monatlich
+kommen. Zwei Quellen: die geplanten Transaktionen von YNAB, alle zwei Monate bis alle zwei
+Jahre (oder einmalig), und Ausgaben, die in den letzten 24 Monaten alle 2, 3, 4, 6 oder 12
+Monate in etwa gleicher Höhe gefunden wurden (`detected`, mit einer `confidence`: eine
+Heuristik, mit dem Nutzer zu prüfen). Ein geplanter Empfänger zählt einmal, über seine
+Planung.
+
+Für jede Kategorie, aus der die Rechnungen bezahlt werden, nennt es, was sie heute enthält,
+ihr Ziel und `on_track`: ob das, zusammen mit dem, was das Ziel noch hinzufügen soll, jede
+Rechnung zu ihrem Datum deckt. Wenn nicht, ist `extra_per_month` der Betrag, der jeden
+Monat zusätzlich zum Ziel zuzuweisen ist, um rechtzeitig bereit zu sein. Hier ist die
+Hausratversicherung schon zurückgelegt, und das Ziel des Tennisclubs verteilt die noch
+fehlenden 400,00 auf die Monate bis zum Mitgliedsbeitrag, fällig im Dezember.
+
+<Code code={upcomingExpenses} lang="json" title="get_upcoming_expenses" />
+
+## Vor dem nächsten Gehalt
+
+Fragen Sie *„Was geht vor dem Zahltag ab, und wie tief sinkt das Girokonto?“*:
+`get_paycheck_plan` findet den Rhythmus des Gehalts in der Historie (wöchentlich, alle zwei
+Wochen, zweimal im Monat oder monatlich), listet, was bis dahin fällig ist (`scheduled`,
+`recurring` Ausgaben an ihrem üblichen Tag, `detected` Ausgaben) und verfolgt den Saldo
+der Giro- und Bargeldkonten Tag für Tag bis zu seinem Tiefpunkt. Das Gehalt kommt am Ende
+seines Tages, nach den Rechnungen dieses Tages. Nennen Sie den Zahler mit
+`income_payee`, oder geben Sie `next_pay_date`, `pay_amount` und `cadence` an;
+`include_next_period` geht bis zum Gehalt danach, und `include_variable_spending` fügt die
+durchschnittlichen Alltagsausgaben hinzu, die sonst außen vor bleiben. Hier kommt das
+Gehalt am 28., ohne dass vorher etwas fällig ist, und die Rechnungen im Oktober lassen das
+Girokonto am 24. auf seinen Tiefpunkt von 3.460,21 sinken.
+
+<Code code={paycheckPlan} lang="json" title="get_paycheck_plan (Auszug)" />
 
 ## Dann den nächsten Monat budgetieren
 

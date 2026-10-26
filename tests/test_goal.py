@@ -12,27 +12,28 @@ import pytest
 
 from avenir_mcp import goal
 
+from .factories import NO_TARGET
+
 TODAY = date(2026, 10, 26)
 
 
 def _cat(balance: int, **target: Any) -> dict[str, Any]:
     """The Vacation category of the month as YNAB returns it, with an optional target."""
-    return {
-        "id": "cat-vacation",
-        "name": "Vacation",
-        "category_group_name": "Savings goals",
-        "category_group_id": "grp-savings",
-        "hidden": False,
-        "deleted": False,
-        "budgeted": 300_000,
-        "activity": 0,
-        "balance": balance,
-        "goal_type": None,
-        "goal_target": None,
-        "goal_target_date": None,
-        "goal_cadence": None,
-        "goal_cadence_frequency": None,
-    } | target
+    return (
+        {
+            "id": "cat-vacation",
+            "name": "Vacation",
+            "category_group_name": "Savings goals",
+            "category_group_id": "grp-savings",
+            "hidden": False,
+            "deleted": False,
+            "budgeted": 300_000,
+            "activity": 0,
+            "balance": balance,
+        }
+        | NO_TARGET
+        | target
+    )
 
 
 def _past(*pairs: tuple[int, int]) -> list[tuple[str, dict[str, Any]]]:

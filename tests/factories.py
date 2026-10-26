@@ -41,6 +41,16 @@ def scheduled(
     return item
 
 
+NO_TARGET: dict[str, Any] = {
+    "goal_type": None,
+    "goal_target": None,
+    "goal_target_date": None,
+    "goal_cadence": None,
+    "goal_cadence_frequency": None,
+}
+"""The target fields of a category that has none, as YNAB returns them."""
+
+
 def month_category(
     key: str, budgeted: int, available: int, group: str = "Everyday", **extra: Any
 ) -> dict[str, Any]:

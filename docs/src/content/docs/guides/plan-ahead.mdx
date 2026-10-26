@@ -13,6 +13,8 @@ import runway from '@snippets/runway.json?raw';
 import debtPayoff from '@snippets/debt_payoff.json?raw';
 import pace from '@snippets/category_pace.json?raw';
 import goal from '@snippets/goal_projection.json?raw';
+import upcomingExpenses from '@snippets/upcoming_expenses.json?raw';
+import paycheckPlan from '@snippets/paycheck_plan.json?raw';
 
 **Goal:** know whether the money lasts, and when it would run out, before it does.
 
@@ -169,6 +171,38 @@ today, 2,000 is reached in March 2027, and 171.43 a month would be enough to get
 then.
 
 <Code code={goal} lang="json" title="get_goal_projection" />
+## The bills that do not come every month
+
+Ask *"which big bills are coming this year, and am I ready for them?"*:
+`get_upcoming_expenses` lists, month by month, the bills that come less often than every
+month. Two sources: YNAB's scheduled transactions every other month to every other year
+(or once), and charges found in the last 24 months every 2, 3, 4, 6 or 12 months at about
+the same amount (`detected`, with a `confidence`: a heuristic, to check with the user). A
+payee with a schedule is counted once, by its schedule.
+
+For each category the bills come out of, it gives what the category holds today, its
+target, and `on_track`: whether that, plus what the target is expected to add, covers each
+bill by its date. When it does not, `extra_per_month` is what to assign each month beyond
+the target to be ready in time. Here the home insurance is already set aside, and the
+tennis club's target spreads the 400.00 still missing over the months up to its
+membership, due in December.
+
+<Code code={upcomingExpenses} lang="json" title="get_upcoming_expenses" />
+
+## Before the next paycheck
+
+Ask *"what comes out before payday, and how low will checking get?"*:
+`get_paycheck_plan` finds the paycheck's rhythm in the history (weekly, every other week,
+twice a month or monthly), lists what is due until it (`scheduled`, `recurring` charges on
+their usual day, `detected` ones) and walks the balance of the checking and cash accounts
+day by day to its lowest point. The paycheck lands at the end of its day, after that day's
+bills. Name the payer with `income_payee`, or give `next_pay_date`, `pay_amount` and
+`cadence`; `include_next_period` goes on to the paycheck after, and
+`include_variable_spending` adds the average everyday spending, otherwise left out. Here
+the salary comes on the 28th with nothing due before it, and October's bills leave the
+checking account at 3,460.21 at its lowest, on the 24th.
+
+<Code code={paycheckPlan} lang="json" title="get_paycheck_plan (excerpt)" />
 
 ## Then budget next month
 

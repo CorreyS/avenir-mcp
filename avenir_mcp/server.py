@@ -33,6 +33,7 @@ from avenir_mcp import (  # noqa: F401  pylint: disable=unused-import
     tools_goal,
     tools_networth,
     tools_pace,
+    tools_paycheck,
     tools_payees,
     tools_payoff,
     tools_runway,
@@ -40,6 +41,7 @@ from avenir_mcp import (  # noqa: F401  pylint: disable=unused-import
     tools_targets,
     tools_underfunded,
     tools_undo,
+    tools_upcoming,
     updates,
 )
 from avenir_mcp.app import WRITE_TAG, configure, mcp, today

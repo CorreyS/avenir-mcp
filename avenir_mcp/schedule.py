@@ -29,6 +29,8 @@ _MONTHS = {
     "everyOtherYear": 24,
 }
 TWICE_A_MONTH_GAP = 15
+SPLIT = "Split"
+"""The category a split schedule is shown in: its lines have their own."""
 
 
 class Occurrence(Model):
@@ -56,7 +58,7 @@ class Occurrence(Model):
     """True when it moves money to another account of the plan."""
 
 
-def _months_later(day: date, months: int, anchor: int) -> date:
+def months_later(day: date, months: int, anchor: int) -> date:
     """Give the date a number of months later, keeping its day where the month has it.
 
     Args:
@@ -93,9 +95,9 @@ def _dates(first: date, start: date, frequency: str, until: date) -> list[date]:
         if frequency in _DAYS:
             current = start + timedelta(days=_DAYS[frequency] * step)
         elif frequency in _MONTHS:
-            current = _months_later(start, _MONTHS[frequency] * step, first.day)
+            current = months_later(start, _MONTHS[frequency] * step, first.day)
         elif frequency == "twiceAMonth":
-            month = _months_later(start, step // 2, first.day)
+            month = months_later(start, step // 2, first.day)
             current = month + timedelta(days=TWICE_A_MONTH_GAP * (step % 2))
         else:
             break
@@ -131,7 +133,7 @@ def occurrences(
         # category carried that very id. On its own line, so the pragma covers no more
         # than this one lookup.
         of_item = item.get("category_id") or ""  # pragma: no mutate
-        category = "Split" if split else categories.get(of_item)
+        category = SPLIT if split else categories.get(of_item)
         for day in _dates(
             date.fromisoformat(item["date_first"]),
             date.fromisoformat(item["date_next"]),

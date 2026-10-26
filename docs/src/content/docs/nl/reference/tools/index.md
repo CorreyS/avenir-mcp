@@ -22,10 +22,12 @@ avenir-mcp biedt deze tools aan. Leestools zijn altijd beschikbaar; schrijftools
 | [`get_goal_projection`](/avenir-mcp/nl/reference/tools/get-goal-projection/) | When a category reaches an amount at its usual pace, and what a month needs to by a date. |
 | [`get_monthly_summary`](/avenir-mcp/nl/reference/tools/get-monthly-summary/) | A month at a glance: income, budgeted, spent, Ready to Assign, overspent categories. |
 | [`get_net_worth_trend`](/avenir-mcp/nl/reference/tools/get-net-worth-trend/) | Assets, debts and net worth at the end of each month, to see debts go down. |
+| [`get_paycheck_plan`](/avenir-mcp/nl/reference/tools/get-paycheck-plan/) | The bills due before the next paycheck, and how low the cash accounts get. |
 | [`get_runway`](/avenir-mcp/nl/reference/tools/get-runway/) | How many months the money available would last without income, at the usual spending. |
 | [`get_savings_rate`](/avenir-mcp/nl/reference/tools/get-savings-rate/) | How much of the income was kept, month by month: income, spending, saved, rate. |
 | [`get_spending_trends`](/avenir-mcp/nl/reference/tools/get-spending-trends/) | Spending per category, month by month, over the last N months. |
 | [`get_underfunded_targets`](/avenir-mcp/nl/reference/tools/get-underfunded-targets/) | The categories whose target still needs money this month, the most urgent first. |
+| [`get_upcoming_expenses`](/avenir-mcp/nl/reference/tools/get-upcoming-expenses/) | The irregular bills of the months ahead, and whether each category will be ready. |
 | [`list_accounts`](/avenir-mcp/nl/reference/tools/list-accounts/) | List the plan's accounts with their balances, bank link and last reconciliation. |
 | [`list_category_groups`](/avenir-mcp/nl/reference/tools/list-category-groups/) | List the category groups a category can be created in or moved to. |
 | [`list_payees`](/avenir-mcp/nl/reference/tools/list-payees/) | List the payees of a plan, those most transactions name first. |

@@ -1,0 +1,123 @@
+{
+  "message": "Next paycheck on 2026-09-28, 3200.00 from ACME EMPLOYER SALAIRE. Before it, 0 bills take 0.00, and the balance is lowest at 2534.48 on 2026-09-25. Until the one after, on 2026-10-28, it is lowest at 3460.21 on 2026-10-24.",
+  "accounts": [
+    "Checking"
+  ],
+  "start_balance": 2534.48,
+  "income": {
+    "payee": "ACME EMPLOYER SALAIRE",
+    "cadence": "monthly",
+    "amount": 3200.0,
+    "last_paid": "2026-08-28",
+    "times_seen": 3,
+    "next_pay_date": "2026-09-28",
+    "following_pay_date": "2026-10-28"
+  },
+  "periods": [
+    {
+      "start": "2026-09-26",
+      "pay_date": "2026-09-28",
+      "pay_amount": 3200.0,
+      "expected": [],
+      "bills_total": 0.0,
+      "variable_spending": 0.0,
+      "lowest_balance": 2534.48,
+      "lowest_on": "2026-09-25",
+      "balance_before_pay": 2534.48
+    },
+    {
+      "start": "2026-09-29",
+      "pay_date": "2026-10-28",
+      "pay_amount": 3200.0,
+      "expected": [
+        {
+          "date": "2026-09-29",
+          "payee": "Transfer : Savings",
+          "amount": -200.0,
+          "source": "scheduled"
+        },
+        {
+          "date": "2026-10-03",
+          "payee": "LANDLORD SARL",
+          "amount": -950.0,
+          "source": "scheduled"
+        },
+        {
+          "date": "2026-10-06",
+          "payee": "FIBERNET - PRELEV",
+          "amount": -29.99,
+          "source": "scheduled"
+        },
+        {
+          "date": "2026-10-08",
+          "payee": "TELCO MOBILE - PRELEV",
+          "amount": -19.99,
+          "source": "scheduled"
+        },
+        {
+          "date": "2026-10-10",
+          "payee": "CHEZ LUCIE",
+          "amount": -49.2,
+          "source": "recurring"
+        },
+        {
+          "date": "2026-10-12",
+          "payee": "POWERCO ENERGIE",
+          "amount": -64.2,
+          "source": "scheduled"
+        },
+        {
+          "date": "2026-10-14",
+          "payee": "MARKET FRESH",
+          "amount": -395.9,
+          "source": "recurring"
+        },
+        {
+          "date": "2026-10-15",
+          "payee": "STREAMFLIX",
+          "amount": -13.49,
+          "source": "recurring"
+        },
+        {
+          "date": "2026-10-18",
+          "payee": "RAIL CO",
+          "amount": -45.0,
+          "source": "recurring"
+        },
+        {
+          "date": "2026-10-20",
+          "payee": "HOMESAFE INSURANCE",
+          "amount": -420.0,
+          "source": "scheduled"
+        },
+        {
+          "date": "2026-10-20",
+          "payee": "TENNIS CLUB - PRELEV",
+          "amount": -22.0,
+          "source": "recurring"
+        },
+        {
+          "date": "2026-10-24",
+          "payee": "SUSHI GO",
+          "amount": -64.5,
+          "source": "recurring"
+        }
+      ],
+      "bills_total": -2274.27,
+      "variable_spending": 0.0,
+      "lowest_balance": 3460.21,
+      "lowest_on": "2026-10-24",
+      "balance_before_pay": 3460.21
+    }
+  ],
+  "lowest_balance": 2534.48,
+  "lowest_on": "2026-09-25",
+  "daily_variable_spending": null,
+  "notes": [
+    "The balance starts from today's balance of the accounts listed and moves day by day; a paycheck lands at the end of its day, after that day's bills.",
+    "Bills: YNAB's scheduled transactions on their dates (scheduled); charges seen in 3 of the last 4 full months at about the same amount, on their usual day, at their usual monthly total, and not again in a month they were already paid (recurring); charges found every 2 to 12 months (detected, a heuristic). A payee with a schedule is projected by it alone.",
+    "Transfers between the accounts listed are left out; money in other than the paycheck counts only when YNAB has it scheduled.",
+    "Projected, not scheduled: the paydays follow the monthly rhythm of 3 paychecks from ACME EMPLOYER SALAIRE; a payday on a weekend or a holiday is not moved.",
+    "Everyday spending that does not recur (groceries at varying shops, fuel, restaurants) is not included; include_variable_spending spreads its average daily pace over the days."
+  ]
+}

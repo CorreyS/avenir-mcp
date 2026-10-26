@@ -252,6 +252,7 @@ pytest_add_cli_args_test_selection = [
     "tests/test_goal.py",
     "tests/test_networth.py",
     "tests/test_pace.py",
+    "tests/test_paycheck.py",
     "tests/test_payees.py",
     "tests/test_payoff.py",
     "tests/test_properties.py",
@@ -269,6 +270,7 @@ pytest_add_cli_args_test_selection = [
     "tests/test_text.py",
     "tests/test_triage.py",
     "tests/test_underfunded.py",
+    "tests/test_upcoming.py",
     "tests/test_updates.py",
     "tests/test_writes.py",
 ]

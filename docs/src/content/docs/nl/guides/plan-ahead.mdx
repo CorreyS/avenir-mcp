@@ -13,6 +13,8 @@ import runway from '@snippets/nl/runway.json?raw';
 import debtPayoff from '@snippets/nl/debt_payoff.json?raw';
 import pace from '@snippets/nl/category_pace.json?raw';
 import goal from '@snippets/nl/goal_projection.json?raw';
+import upcomingExpenses from '@snippets/nl/upcoming_expenses.json?raw';
+import paycheckPlan from '@snippets/nl/paycheck_plan.json?raw';
 
 **Doel:** weten of het geld volstaat, en wanneer het op zou raken, voordat het zover is.
 
@@ -170,6 +172,40 @@ Hier zet het huishouden sinds juni 200 per maand in Vakantie: van de 800 die er 
 staat, is 2.000 bereikt in maart 2027, en 171,43 per maand zou volstaan om er dan te zijn.
 
 <Code code={goal} lang="json" title="get_goal_projection" />
+## De rekeningen die niet elke maand komen
+
+Vraag *„Welke grote rekeningen komen er dit jaar, en ben ik er klaar voor?“*:
+`get_upcoming_expenses` toont maand voor maand de rekeningen die minder vaak dan maandelijks
+komen. Twee bronnen: de geplande transacties van YNAB, van om de twee maanden tot om de twee
+jaar (of eenmalig), en uitgaven die in de laatste 24 maanden om de 2, 3, 4, 6 of 12 maanden
+voor ongeveer hetzelfde bedrag zijn gevonden (`detected`, met een `confidence`: een
+heuristiek, om met de gebruiker te controleren). Een geplande begunstigde telt één keer,
+via zijn planning.
+
+Voor elke categorie waaruit de rekeningen worden betaald, geeft het wat ze vandaag bevat,
+haar doel en `on_track`: of dat, samen met wat het doel er nog aan toevoegt, elke rekening
+op haar datum dekt. Zo niet, dan is `extra_per_month` wat er elke maand bovenop het doel
+moet worden toegewezen om op tijd klaar te zijn. Hier is de woningverzekering al opzij
+gezet, en het doel van de tennisclub spreidt de 400,00 die nog ontbreken over de maanden
+tot de contributie, die in december vervalt.
+
+<Code code={upcomingExpenses} lang="json" title="get_upcoming_expenses" />
+
+## Vóór het volgende salaris
+
+Vraag *„Wat gaat er af vóór de betaaldag, en hoe laag zakt de betaalrekening?“*:
+`get_paycheck_plan` vindt het ritme van het salaris in de geschiedenis (wekelijks, om de
+twee weken, twee keer per maand of maandelijks), toont wat er tot dan vervalt
+(`scheduled`, `recurring` uitgaven op hun gewone dag, `detected` uitgaven) en volgt het
+saldo van de betaal- en contantrekeningen dag voor dag tot het laagste punt. Het salaris
+komt aan het eind van de dag binnen, na de rekeningen van die dag. Noem de betaler met
+`income_payee`, of geef `next_pay_date`, `pay_amount` en `cadence`;
+`include_next_period` gaat door tot het salaris daarna, en `include_variable_spending`
+voegt de gemiddelde dagelijkse uitgaven toe, die anders buiten beschouwing blijven. Hier
+komt het salaris op de 28e zonder dat er eerder iets vervalt, en de rekeningen van oktober
+laten de betaalrekening op de 24e zakken tot 3.460,21, het laagste punt.
+
+<Code code={paycheckPlan} lang="json" title="get_paycheck_plan (fragment)" />
 
 ## Dan volgende maand budgetteren
 

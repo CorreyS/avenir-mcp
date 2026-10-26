@@ -60,6 +60,8 @@ def test_catalog_is_exactly_the_published_tools() -> None:
             "find_recurring_charges",
             "get_net_worth_trend",
             "get_runway",
+            "get_upcoming_expenses",
+            "get_paycheck_plan",
             "get_savings_rate",
             "get_underfunded_targets",
             "get_debt_payoff_plan",

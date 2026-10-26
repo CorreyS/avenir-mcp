@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside } from '@astrojs/starlight/components';
 
-avenir-mcp gives an agent 35 tools, 4 resources and 4 prompts over your YNAB plans. This
+avenir-mcp gives an agent 37 tools, 4 resources and 4 prompts over your YNAB plans. This
 page lists them by what you want to do. Each row gives a sentence you can say to the
 agent; the agent chooses the tool.
 
@@ -92,6 +92,8 @@ and likely duplicates (same amount and merchant, at most 3 days apart). Guides:
 | *“Will I go below zero before December?”* | [`forecast_balance`](/avenir-mcp/reference/tools/forecast-balance/) — month by month, with its assumptions | R |
 | *“Am I paying off my debts?”* | [`get_net_worth_trend`](/avenir-mcp/reference/tools/get-net-worth-trend/) — assets, debts and net worth at each month end, tracking accounts included | R |
 | *“If I lost my income, how long could I last?”* | [`get_runway`](/avenir-mcp/reference/tools/get-runway/) — months the money in the budget would cover the usual spending, essentials apart | R |
+| *“Which big bills are coming this year, and am I ready?”* | [`get_upcoming_expenses`](/avenir-mcp/reference/tools/get-upcoming-expenses/) — yearly, half-yearly and quarterly bills, scheduled or found in the history, and whether each category will hold enough in time | R |
+| *“What comes out before payday, and how low will checking get?”* | [`get_paycheck_plan`](/avenir-mcp/reference/tools/get-paycheck-plan/) — the next paycheck from the history, the bills before it and the lowest balance, day by day | R |
 | *“When will my debts be paid off if I put 500 a month on them?”* | [`get_debt_payoff_plan`](/avenir-mcp/reference/tools/get-debt-payoff-plan/) — avalanche or snowball, the month each debt is paid off and the interest each order costs | R |
 | *“Which categories will I overspend this month?”* | [`get_category_pace`](/avenir-mcp/reference/tools/get-category-pace/) — each category's spending projected to the end of the month from its own rhythm, those likely to run out first | R |
 | *“When will Holidays reach 2,000?”* | [`get_goal_projection`](/avenir-mcp/reference/tools/get-goal-projection/) — the month a category reaches an amount at its usual pace, and what a month needs to reach it by a date | R |

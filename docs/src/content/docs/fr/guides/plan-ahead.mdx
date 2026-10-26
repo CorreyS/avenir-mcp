@@ -13,6 +13,8 @@ import runway from '@snippets/fr/runway.json?raw';
 import debtPayoff from '@snippets/fr/debt_payoff.json?raw';
 import pace from '@snippets/fr/category_pace.json?raw';
 import goal from '@snippets/fr/goal_projection.json?raw';
+import upcomingExpenses from '@snippets/fr/upcoming_expenses.json?raw';
+import paycheckPlan from '@snippets/fr/paycheck_plan.json?raw';
 
 **Objectif :** savoir si l'argent tiendra, et quand il manquerait, avant que ça arrive.
 
@@ -173,6 +175,40 @@ aujourd'hui, 2 000 sont atteints en mars 2027, et 171,43 par mois suffiraient po
 cette date.
 
 <Code code={goal} lang="json" title="get_goal_projection" />
+## Les factures qui ne reviennent pas chaque mois
+
+Demandez *« quelles grosses factures arrivent cette année, et suis-je prêt ? »* :
+`get_upcoming_expenses` liste, mois par mois, les factures moins fréquentes que mensuelles.
+Deux sources : les transactions planifiées de YNAB, d'un mois sur deux à une année sur deux
+(ou une seule fois), et les dépenses trouvées sur les 24 derniers mois tous les 2, 3, 4, 6
+ou 12 mois, à peu près au même montant (`detected`, avec une `confidence` : une heuristique,
+à vérifier avec l'utilisateur). Un bénéficiaire planifié est compté une fois, par sa
+planification.
+
+Pour chaque catégorie d'où sortent ces factures, il donne ce qu'elle contient aujourd'hui,
+son objectif, et `on_track` : si cela, plus ce que l'objectif doit encore y ajouter, couvre
+chaque facture à sa date. Sinon, `extra_per_month` est ce qu'il faut assigner chaque mois en
+plus de l'objectif pour être prêt à temps. Ici, l'assurance habitation est déjà mise de
+côté, et l'objectif du club de tennis étale les 400,00 qui manquent encore sur les mois
+qui précèdent la cotisation, due en décembre.
+
+<Code code={upcomingExpenses} lang="json" title="get_upcoming_expenses" />
+
+## Avant la prochaine paie
+
+Demandez *« qu'est-ce qui part avant la paie, et jusqu'où descend le compte courant ? »* :
+`get_paycheck_plan` trouve le rythme de la paie dans l'historique (chaque semaine, toutes
+les deux semaines, deux fois par mois ou chaque mois), liste ce qui tombe d'ici là
+(`scheduled`, les dépenses `recurring` à leur jour habituel, celles `detected`) et suit le
+solde des comptes courants et espèces jour par jour jusqu'à son point le plus bas. La paie
+arrive en fin de journée, après les factures du jour. Nommez le payeur avec
+`income_payee`, ou donnez `next_pay_date`, `pay_amount` et `cadence` ;
+`include_next_period` va jusqu'à la paie suivante, et `include_variable_spending` ajoute
+la moyenne des dépenses courantes, laissée de côté sinon. Ici, le salaire arrive le 28 sans
+rien à payer avant, et les factures d'octobre laissent le compte courant à 3 460,21 au plus
+bas, le 24.
+
+<Code code={paycheckPlan} lang="json" title="get_paycheck_plan (extrait)" />
 
 ## Puis préparer le mois suivant
 

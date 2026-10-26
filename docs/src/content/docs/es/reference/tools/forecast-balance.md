@@ -202,7 +202,7 @@ Respuesta sobre el presupuesto de demostración:
         "frequency": "monthly",
         "transfer": false
       },
-      "… 7 more"
+      "… 8 more"
     ]
   },
   "months": [
@@ -234,9 +234,9 @@ Respuesta sobre el presupuesto de demostración:
       "month": "2026-12",
       "start": 9005.94,
       "inflows": 3200.0,
-      "outflows": -1654.27,
-      "end": 10551.67,
-      "lowest": 8365.63
+      "outflows": -2134.27,
+      "end": 10071.67,
+      "lowest": 7885.63
     }
   ],
   "first_shortfall": null

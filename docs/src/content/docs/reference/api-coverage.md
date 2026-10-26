@@ -15,7 +15,7 @@ YNAB's API 1.87.0 has 44 operations: 16 used by avenir-mcp, 11 planned, 17 left 
 |---|---|---|
 | `GET /plans` | covered | `list_plans`, `ynab://plans` |
 | `GET /plans/{plan_id}` | excluded | The whole plan at once: far more than an agent can read; tools fetch the parts they need. |
-| `GET /plans/{plan_id}/accounts` | covered | `apply_categories`, `create_transactions`, `find_transactions`, `forecast_balance`, `get_debt_payoff_plan`, `get_net_worth_trend`, `get_runway`, `get_savings_rate`, `list_accounts`, `list_scheduled_transactions`, `reconcile_account`, `split_transaction`, `suggest_categories`, `ynab://plans/{plan_id}/accounts` |
+| `GET /plans/{plan_id}/accounts` | covered | `apply_categories`, `create_transactions`, `find_transactions`, `forecast_balance`, `get_debt_payoff_plan`, `get_net_worth_trend`, `get_paycheck_plan`, `get_runway`, `get_savings_rate`, `list_accounts`, `list_scheduled_transactions`, `reconcile_account`, `split_transaction`, `suggest_categories`, `ynab://plans/{plan_id}/accounts` |
 | `POST /plans/{plan_id}/accounts` | excluded | Accounts are opened in YNAB, where the bank connection is set up. |
 | `GET /plans/{plan_id}/accounts/{account_id}` | excluded | list_accounts gives every account in the same single request. |
 | `GET /plans/{plan_id}/accounts/{account_id}/transactions` | excluded | find_transactions filters the plan's transactions by account, in one request. |
@@ -29,7 +29,7 @@ YNAB's API 1.87.0 has 44 operations: 16 used by avenir-mcp, 11 planned, 17 left 
 | `GET /plans/{plan_id}/money_movement_groups` | planned | Moves of money grouped as the user made them, for the monthly review. |
 | `GET /plans/{plan_id}/money_movements` | planned | Money moved between categories, for the monthly review. |
 | `GET /plans/{plan_id}/months` | covered | `get_age_of_money`, `get_goal_projection`, `get_spending_trends` |
-| `GET /plans/{plan_id}/months/{month}` | covered | `get_budget_vs_actual`, `get_category_balances`, `get_category_pace`, `get_goal_projection`, `get_monthly_summary`, `get_spending_trends`, `get_underfunded_targets`, `move_money`, `set_category_budget`, `undo_operation` |
+| `GET /plans/{plan_id}/months/{month}` | covered | `get_budget_vs_actual`, `get_category_balances`, `get_category_pace`, `get_goal_projection`, `get_monthly_summary`, `get_spending_trends`, `get_underfunded_targets`, `get_upcoming_expenses`, `move_money`, `set_category_budget`, `undo_operation` |
 | `GET /plans/{plan_id}/months/{month}/categories/{category_id}` | excluded | A month's categories come in one request with the month. |
 | `PATCH /plans/{plan_id}/months/{month}/categories/{category_id}` | covered | `move_money`, `set_category_budget`, `undo_operation` |
 | `GET /plans/{plan_id}/months/{month}/money_movement_groups` | planned | Moves of money grouped as the user made them in a month, for the monthly review. |
@@ -43,13 +43,13 @@ YNAB's API 1.87.0 has 44 operations: 16 used by avenir-mcp, 11 planned, 17 left 
 | `PATCH /plans/{plan_id}/payees/{payee_id}` | covered | `rename_payee`, `undo_operation` |
 | `GET /plans/{plan_id}/payees/{payee_id}/payee_locations` | excluded | Where a payment was made: personal data that no task needs. |
 | `GET /plans/{plan_id}/payees/{payee_id}/transactions` | excluded | find_transactions filters the plan's transactions by payee, whatever the bank label, in one request. |
-| `GET /plans/{plan_id}/scheduled_transactions` | covered | `find_recurring_charges`, `forecast_balance`, `get_category_pace`, `list_scheduled_transactions` |
+| `GET /plans/{plan_id}/scheduled_transactions` | covered | `find_recurring_charges`, `forecast_balance`, `get_category_pace`, `get_paycheck_plan`, `get_upcoming_expenses`, `list_scheduled_transactions` |
 | `POST /plans/{plan_id}/scheduled_transactions` | planned | Schedule a coming payment, after reading them is in place. |
 | `GET /plans/{plan_id}/scheduled_transactions/{scheduled_transaction_id}` | excluded | list_scheduled_transactions reads every schedule in one request. |
 | `PUT /plans/{plan_id}/scheduled_transactions/{scheduled_transaction_id}` | planned | Change a coming payment, after reading them is in place. |
 | `DELETE /plans/{plan_id}/scheduled_transactions/{scheduled_transaction_id}` | planned | Cancel a coming payment, after reading them is in place. |
 | `GET /plans/{plan_id}/settings` | planned | The plan's currency and formats, to show amounts with their currency. |
-| `GET /plans/{plan_id}/transactions` | covered | `apply_categories`, `find_recurring_charges`, `find_transactions`, `flag_transactions`, `forecast_balance`, `get_category_pace`, `get_debt_payoff_plan`, `get_net_worth_trend`, `get_runway`, `get_savings_rate`, `list_payees`, `reconcile_account`, `rename_payee`, `split_transaction`, `suggest_categories`, `undo_operation` |
+| `GET /plans/{plan_id}/transactions` | covered | `apply_categories`, `find_recurring_charges`, `find_transactions`, `flag_transactions`, `forecast_balance`, `get_category_pace`, `get_debt_payoff_plan`, `get_net_worth_trend`, `get_paycheck_plan`, `get_runway`, `get_savings_rate`, `get_upcoming_expenses`, `list_payees`, `reconcile_account`, `rename_payee`, `split_transaction`, `suggest_categories`, `undo_operation` |
 | `POST /plans/{plan_id}/transactions` | covered | `create_transactions`, `reconcile_account` |
 | `PATCH /plans/{plan_id}/transactions` | covered | `apply_categories`, `approve_transactions`, `flag_transactions`, `reconcile_account`, `split_transaction`, `undo_operation` |
 | `POST /plans/{plan_id}/transactions/import` | covered | `import_transactions` |
@@ -75,10 +75,12 @@ What each tool and resource reads and writes, paths without the leading `/plans/
 | `get_goal_projection` | `GET /months`, `GET /months/{month}` | — |
 | `get_monthly_summary` | `GET /months/{month}` | — |
 | `get_net_worth_trend` | `GET /accounts`, `GET /transactions` | — |
+| `get_paycheck_plan` | `GET /accounts`, `GET /scheduled_transactions`, `GET /transactions` | — |
 | `get_runway` | `GET /accounts`, `GET /categories`, `GET /transactions` | — |
 | `get_savings_rate` | `GET /accounts`, `GET /categories`, `GET /transactions` | — |
 | `get_spending_trends` | `GET /months`, `GET /months/{month}` | — |
 | `get_underfunded_targets` | `GET /months/{month}` | — |
+| `get_upcoming_expenses` | `GET /months/{month}`, `GET /scheduled_transactions`, `GET /transactions` | — |
 | `list_accounts` | `GET /accounts` | — |
 | `list_category_groups` | `GET /categories` | — |
 | `list_payees` | `GET /payees`, `GET /transactions` | — |

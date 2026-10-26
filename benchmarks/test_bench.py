@@ -24,6 +24,7 @@ from avenir_mcp import (
     search,
     text,
     triage,
+    upcoming,
     writes,
 )
 
@@ -78,6 +79,11 @@ def test_analyse_an_account_for_reconciliation(benchmark: BenchmarkFixture) -> N
 def test_find_the_recurring_charges(benchmark: BenchmarkFixture) -> None:
     """forecast_balance's first step: payees that recur over the last four months."""
     benchmark(forecast.recurring, TXS, heavy_plan.TODAY)
+
+
+def test_find_the_bills_that_come_every_few_months(benchmark: BenchmarkFixture) -> None:
+    """get_upcoming_expenses's first step: payees charged at a longer rhythm over 24 months."""
+    benchmark(upcoming.irregular, TXS, heavy_plan.TODAY)
 
 
 def test_project_24_months_day_by_day(benchmark: BenchmarkFixture) -> None:

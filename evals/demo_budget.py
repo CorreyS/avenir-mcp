@@ -532,6 +532,9 @@ SCHEDULED: list[tuple[str, str, str, str, int, str, str | None, str, str | None]
      CHECKING, SAVINGS),
     ("sch-insurance", "2025-10-20", "2026-10-20", "yearly", -420_000, "HOMESAFE INSURANCE",
      "cat-insurance", CHECKING, None),
+    # The tennis club's yearly membership, the one its dated target saves for.
+    ("sch-tennis", "2025-12-01", "2026-12-01", "yearly", -480_000, "TENNIS CLUB MEMBERSHIP",
+     "cat-tennis", CHECKING, None),
 ]  # fmt: skip
 
 

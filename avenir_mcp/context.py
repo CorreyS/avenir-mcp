@@ -50,6 +50,9 @@ GUIDE = """# avenir-mcp: how to work with this YNAB server
 - Plan: `forecast_balance` says when money would run out; check its assumptions with
   the user. `move_money` moves money from one category to another for a month, in
   one confirmed and undoable step; `set_category_budget` sets one category's amount.
+- Bills ahead: `get_upcoming_expenses` lists the bills that do not come every month and
+  whether each category is ready; `get_paycheck_plan` lists what is due before the next
+  paycheck and how low checking gets. Relay what their notes say is projected.
 - Missing transactions: first check `list_accounts` for a broken bank link, which the
   user fixes in YNAB; then `create_transactions`. New categories: `create_category`;
   renaming or moving one: `update_category`.

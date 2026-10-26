@@ -1,0 +1,71 @@
+{
+  "message": "2 upcoming expenses, 900.00 in all, between 2026-09-25 and 2027-09-25. Every category they come out of is on track.",
+  "since": "2026-09-25",
+  "until": "2027-09-25",
+  "months": [
+    {
+      "month": "2026-10",
+      "total": -420.0,
+      "expenses": [
+        {
+          "date": "2026-10-20",
+          "payee": "HOMESAFE INSURANCE",
+          "amount": -420.0,
+          "source": "scheduled",
+          "frequency": "yearly",
+          "category": "Hausratversicherung",
+          "category_id": "cat-insurance",
+          "confidence": null
+        }
+      ]
+    },
+    {
+      "month": "2026-12",
+      "total": -480.0,
+      "expenses": [
+        {
+          "date": "2026-12-01",
+          "payee": "TENNIS CLUB MEMBERSHIP",
+          "amount": -480.0,
+          "source": "scheduled",
+          "frequency": "yearly",
+          "category": "Tennis",
+          "category_id": "cat-tennis",
+          "confidence": null
+        }
+      ]
+    }
+  ],
+  "total": -900.0,
+  "categories": [
+    {
+      "category_id": "cat-insurance",
+      "name": "Hausratversicherung",
+      "available": 420.0,
+      "target": "420.00 by 2026-10-01",
+      "due": 420.0,
+      "first_due": "2026-10-20",
+      "expected_funding": 0.0,
+      "on_track": true,
+      "shortfall": 0.0,
+      "extra_per_month": 0.0
+    },
+    {
+      "category_id": "cat-tennis",
+      "name": "Tennis",
+      "available": 80.0,
+      "target": "480.00 by 2026-12-01",
+      "due": 480.0,
+      "first_due": "2026-12-01",
+      "expected_funding": 400.0,
+      "on_track": true,
+      "shortfall": 0.0,
+      "extra_per_month": 0.0
+    }
+  ],
+  "notes": [
+    "scheduled: the scheduled transactions less frequent than monthly (every other month to every other year, or once), money out only, transfers between accounts left out.",
+    "detected: a heuristic. A payee charged at a regular interval of 2, 3, 4, 6 or 12 months in the last 24 months, at about the same amount (within 20 %); the latest amount is projected. Confidence is high when seen 3 times or more, low when twice. A charge late by less than a month is expected today; later, it is taken as stopped. A payee a YNAB schedule covers is left to its schedule.",
+    "on_track: what the category holds today, plus what its target is expected to add by each bill (spread as YNAB spreads a target by a date, or at its rhythm), covers everything due by then. A category that also pays monthly spending from the same money is less ready than shown."
+  ]
+}

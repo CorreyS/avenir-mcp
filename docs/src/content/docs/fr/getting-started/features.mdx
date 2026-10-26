@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside } from '@astrojs/starlight/components';
 
-avenir-mcp donne à un agent 35 outils, 4 ressources et 4 prompts sur vos plans YNAB. Cette
+avenir-mcp donne à un agent 37 outils, 4 ressources et 4 prompts sur vos plans YNAB. Cette
 page les classe selon ce que vous voulez faire. Chaque ligne donne une phrase à dire à
 l'agent ; c'est lui qui choisit l'outil.
 
@@ -95,6 +95,8 @@ plus). Guides : [Rapprocher un compte](/avenir-mcp/fr/guides/reconcile/),
 | *« Vais-je passer sous zéro avant décembre ? »* | [`forecast_balance`](/avenir-mcp/fr/reference/tools/forecast-balance/) — mois par mois, avec ses hypothèses | L |
 | *« Est-ce que je rembourse mes dettes ? »* | [`get_net_worth_trend`](/avenir-mcp/fr/reference/tools/get-net-worth-trend/) — actifs, dettes et patrimoine net à chaque fin de mois, comptes de suivi compris | L |
 | *« Si je perdais mes revenus, combien de temps tiendrais-je ? »* | [`get_runway`](/avenir-mcp/fr/reference/tools/get-runway/) — les mois que l'argent du budget couvrirait aux dépenses habituelles, l'essentiel à part | L |
+| *« Quelles grosses factures arrivent cette année, et suis-je prêt ? »* | [`get_upcoming_expenses`](/avenir-mcp/fr/reference/tools/get-upcoming-expenses/) — les factures annuelles, semestrielles et trimestrielles, planifiées ou trouvées dans l'historique, et si chaque catégorie aura assez à temps | L |
+| *« Qu'est-ce qui part avant la paie, et jusqu'où descend le compte courant ? »* | [`get_paycheck_plan`](/avenir-mcp/fr/reference/tools/get-paycheck-plan/) — la prochaine paie d'après l'historique, les factures d'ici là et le solde le plus bas, jour par jour | L |
 | *« Quand mes dettes seront-elles remboursées si j'y mets 500 par mois ? »* | [`get_debt_payoff_plan`](/avenir-mcp/fr/reference/tools/get-debt-payoff-plan/) — avalanche ou boule de neige, le mois où chaque dette est soldée et les intérêts de chaque ordre | L |
 | *« Quelles catégories vais-je dépasser ce mois-ci ? »* | [`get_category_pace`](/avenir-mcp/fr/reference/tools/get-category-pace/) — les dépenses de chaque catégorie projetées à la fin du mois selon son propre rythme, celles qui risquent d'être à court d'abord | L |
 | *« Quand Vacances atteindra-t-elle 2 000 ? »* | [`get_goal_projection`](/avenir-mcp/fr/reference/tools/get-goal-projection/) — le mois où une catégorie atteint un montant à son rythme habituel, et ce qu'il faut par mois pour l'atteindre à une date | L |

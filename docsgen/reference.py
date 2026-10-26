@@ -63,6 +63,8 @@ GUIDES = {
     "get_debt_payoff_plan": "guides/plan-ahead",
     "get_category_pace": "guides/plan-ahead",
     "get_goal_projection": "guides/plan-ahead",
+    "get_upcoming_expenses": "guides/plan-ahead",
+    "get_paycheck_plan": "guides/plan-ahead",
     "set_category_budget": "guides/categories",
     "move_money": "guides/monthly-review",
     "create_transactions": "guides/missing-transactions",

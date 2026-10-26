@@ -167,6 +167,16 @@ CALLS: list[Call] = [
         {"plan_id": BUDGET, "monthly_budget": 500},
         keep=10,
     ),
+    # The yearly home insurance in October and the tennis club's membership in December,
+    # each category on track for its bill.
+    Call("upcoming_expenses", "get_upcoming_expenses", {"plan_id": BUDGET}),
+    # The salary on the 28th, then the month after it: October's bills one by one.
+    Call(
+        "paycheck_plan",
+        "get_paycheck_plan",
+        {"plan_id": BUDGET, "include_next_period": True},
+        keep=6,
+    ),
     Call(
         "forecast",
         "forecast_balance",

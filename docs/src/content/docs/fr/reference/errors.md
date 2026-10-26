@@ -59,6 +59,14 @@ Tout outil qui appelle YNAB peut renvoyer l'erreur de YNAB : `Error calling tool
 
 - `month must be 'current' or the first day of a month as YYYY-MM-01, got '{month}'.`
 
+## [`get_paycheck_plan`](/avenir-mcp/fr/reference/tools/get-paycheck-plan/)
+
+- `next_pay_date must be between today and {MAX_DAYS_AHEAD} days ahead.`
+- `No open checking or cash account on budget: give account_ids (from list_accounts).`
+- `Unknown account(s) {unknown}: use ids from list_accounts.`
+- `Give cadence: the paycheck after the next one cannot be dated without a rhythm.`
+- `Give pay_amount: the period after the next paycheck starts with it.`
+
 ## [`get_runway`](/avenir-mcp/fr/reference/tools/get-runway/)
 
 - `Unknown category group(s) {given}: give names or ids of this plan's groups, as list_category_groups shows them: {names}.`

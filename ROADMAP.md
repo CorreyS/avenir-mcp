@@ -28,6 +28,11 @@ plan as the existing reports are:
   month, each projected from its own rhythm of spending. *Done.*
 - `get_goal_projection`: when a category reaches an amount at its usual pace, and what a
   month needs to reach it by a date. *Done.*
+- `get_upcoming_expenses`: the bills that do not come every month (yearly, twice a year,
+  quarterly), scheduled in YNAB or found in the history, and whether each category will
+  hold enough in time. *Done.*
+- `get_paycheck_plan`: the bills due before the next paycheck, found from the history's
+  rhythm, and how low the checking account gets until then. *Done.*
 
 ### Payees named as the user names them
 
