@@ -375,85 +375,6 @@ def _same_payer(one: str, other: str) -> bool:
     )
 
 
-def _charges(
-    history: list[dict[str, Any]], planned: frozenset[tuple[str, bool]], today: date
-) -> list[forecast.Recurring]:
-    """Find the charges that recur every month and no schedule covers.
-
-    Args:
-        history: The transactions of the accounts, amounts in milliunits.
-        planned: (normalised payee, is money out) pairs of the schedules.
-        today: The day of the question.
-
-    Returns:
-        The recurring charges, money out only.
-    """
-    return [
-        r
-        for r in forecast.recurring(history, today)
-        if r.amount < 0 and not forecast.is_scheduled(r.payee, True, planned)
-    ]
-
-
-def _months(first: date, last: date) -> list[tuple[int, int]]:
-    """List the months from one day's to another's.
-
-    Args:
-        first: The first day.
-        last: The last day.
-
-    Returns:
-        (year, month) pairs, in order.
-    """
-    found = []
-    month = first.replace(day=1)
-    while month <= last:
-        found.append((month.year, month.month))
-        month = schedule.months_later(month, 1, 1)
-    return found
-
-
-def _recurring(
-    history: list[dict[str, Any]],
-    charges: list[forecast.Recurring],
-    today: date,
-    window: tuple[date, date],
-) -> list[Expected]:
-    """Place each recurring charge on its usual day of each month of the window.
-
-    Args:
-        history: The transactions of the accounts, amounts in milliunits.
-        charges: The recurring charges.
-        today: The day of the question; a charge already paid this month is not expected
-            again this month.
-        window: First and last day, included.
-
-    Returns:
-        The charges expected.
-    """
-    this_month = today.isoformat()[:7]
-    paid = {
-        untrusted(normalize_payee(tx.get("payee_name") or ""))
-        for tx in history
-        if forecast.usable(tx) and tx["date"][:7] == this_month and tx["date"] <= today.isoformat()
-    }
-    found = []
-    for charge in charges:
-        for year, month in _months(*window):
-            day = schedule.months_later(date(year, month, 1), 0, charge.day)
-            again = (year, month) == (today.year, today.month) and charge.payee in paid
-            if window[0] <= day <= window[1] and not again:
-                found.append(
-                    Expected(
-                        date=day.isoformat(),
-                        payee=charge.payee,
-                        amount=charge.amount,
-                        source="recurring",
-                    )
-                )
-    return found
-
-
 def _expected(  # pylint: disable=too-many-arguments
     history: list[dict[str, Any]],
     plans: list[dict[str, Any]],
@@ -480,7 +401,10 @@ def _expected(  # pylint: disable=too-many-arguments
         Expected(date=o.date, payee=o.payee, amount=o.amount, source="scheduled")
         for o in schedule.occurrences(plans, {}, {}, *window)
     ]
-    found += _recurring(history, charges, today, window)
+    found += [
+        Expected(date=day.isoformat(), payee=charge.payee, amount=charge.amount, source="recurring")
+        for charge, day in upcoming.monthly_dates(history, charges, today, window)
+    ]
     for pattern in upcoming.irregular(history, today):
         if not forecast.is_scheduled(pattern.payee, True, planned):
             found += [
@@ -725,7 +649,7 @@ def summary(  # pylint: disable=too-many-arguments,too-many-locals
         )
     ]
     planned = upcoming.planned_payees(plans)
-    charges = _charges(history, planned, today)
+    charges = upcoming.monthly(history, planned, today)
     windows = [(today + timedelta(days=1), payday.pay_date)]
     if include_next_period and payday.following:
         windows.append((payday.pay_date + timedelta(days=1), payday.following))

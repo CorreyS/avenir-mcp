@@ -1,13 +1,15 @@
 # SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
 # SPDX-License-Identifier: MIT
 
-"""The irregular bills ahead, and whether each category will be ready for them.
+"""The bills ahead, and whether each category will be ready for them.
 
-Two sources. YNAB's scheduled transactions that come less often than every month
-(every other month to every other year, or once), on their dates. And charges found in
-the history at a regular interval longer than a month (every 2, 3, 4, 6 or 12 months):
-a heuristic, each with its confidence. A payee a schedule covers is left to its
-schedule, matched as forecast.is_scheduled matches it. Sums are made in milliunits.
+Two sources by default. YNAB's scheduled transactions that come less often than every
+month (every other month to every other year, or once), on their dates. And charges
+found in the history at a regular interval longer than a month (every 2, 3, 4, 6 or 12
+months): a heuristic, each with its confidence. Asked for, the monthly ones join: every
+scheduled transaction, and the charges forecast.recurring finds every month, on their
+usual day. A payee a schedule covers is left to its schedule, matched as
+forecast.is_scheduled matches it. Sums are made in milliunits.
 """
 
 from __future__ import annotations
@@ -29,7 +31,9 @@ from avenir_mcp.text import untrusted
 LOOKBACK_MONTHS = 24
 """Full months of history searched: two years, enough to see a yearly bill twice."""
 MAX_HORIZON_MONTHS = 24
-"""How far ahead the bills are listed, at most."""
+"""How far ahead the bills are listed, at most, in months."""
+MAX_HORIZON_DAYS = 366
+"""How far ahead the bills are listed, at most, in days: a year, a leap one included."""
 LATE_DAYS = 31
 """A charge found in the history and late by more than this is taken as stopped."""
 DAYS_PER_MONTH = 365.25 / 12
@@ -72,7 +76,7 @@ _EVERY_OTHER_YEAR = 14
 _MONTHLY_KINDS = frozenset({"MF", "DEBT"})
 
 Confidence = Literal["high", "low"]
-Source = Literal["scheduled", "detected"]
+Source = Literal["scheduled", "recurring", "detected"]
 
 
 class Pattern(Model):
@@ -107,16 +111,20 @@ class UpcomingExpense(Model):
     amount: float
     """Amount expected, negative."""
     source: Source
-    """scheduled (a YNAB scheduled transaction) or detected (a pattern of the history)."""
+    """scheduled (a YNAB scheduled transaction), recurring (charged in 3 of the last 4
+    full months at about the same amount, expected on its usual day; only with
+    include_monthly) or detected (charged every 2 to 12 months, a pattern of the
+    history)."""
     frequency: str
-    """How often it comes back, in YNAB's words (yearly, twiceAYear, every3Months, ...;
-    never for a schedule made once)."""
+    """How often it comes back, in YNAB's words (monthly, yearly, twiceAYear,
+    every3Months, ...; never for a schedule made once)."""
     category: str | None
     """Category name; Split for a split schedule; null when unknown."""
     category_id: str | None
     """YNAB id of the category; null when unknown or split."""
     confidence: Confidence | None
-    """For a detected one: high (seen 3 times or more) or low (twice); null when scheduled."""
+    """For a detected one: high (seen 3 times or more) or low (twice). For a recurring
+    one: high (in each of the last 4 full months) or low (in 3). Null when scheduled."""
 
 
 class ExpenseMonth(Model):
@@ -158,7 +166,7 @@ class CategoryReadiness(Model):
 
 
 class UpcomingExpenses(Model):
-    """The irregular bills ahead, month by month, and the readiness of their categories."""
+    """The bills ahead, month by month, and the readiness of their categories."""
 
     message: str
     """The conclusion in one sentence or two, for the agent to relay."""
@@ -167,7 +175,7 @@ class UpcomingExpenses(Model):
     until: str
     """Last day looked at, YYYY-MM-DD."""
     months: list[ExpenseMonth]
-    """The months that hold a bill, earliest first."""
+    """The months that hold a bill, earliest first, each with its bills in date order."""
     total: float
     """What every bill listed adds up to, negative."""
     categories: list[CategoryReadiness]
@@ -322,6 +330,78 @@ def planned_payees(scheduled: list[dict[str, Any]]) -> frozenset[tuple[str, bool
     )
 
 
+def monthly(
+    transactions: list[dict[str, Any]], planned: frozenset[tuple[str, bool]], today: date
+) -> list[forecast.Recurring]:
+    """Find the charges that recur every month and no schedule covers.
+
+    Args:
+        transactions: The transactions, amounts in milliunits.
+        planned: (normalised payee, is money out) pairs of the schedules.
+        today: The day of the question.
+
+    Returns:
+        The charges forecast.recurring finds, money out only.
+    """
+    return [
+        r
+        for r in forecast.recurring(transactions, today)
+        if r.amount < 0 and not forecast.is_scheduled(r.payee, True, planned)
+    ]
+
+
+def _months(first: date, last: date) -> list[tuple[int, int]]:
+    """List the months from one day's to another's.
+
+    Args:
+        first: The first day.
+        last: The last day.
+
+    Returns:
+        (year, month) pairs, in order.
+    """
+    found = []
+    month = first.replace(day=1)
+    while month <= last:
+        found.append((month.year, month.month))
+        month = schedule.months_later(month, 1, 1)
+    return found
+
+
+def monthly_dates(
+    transactions: list[dict[str, Any]],
+    charges: list[forecast.Recurring],
+    today: date,
+    window: tuple[date, date],
+) -> list[tuple[forecast.Recurring, date]]:
+    """Place each monthly charge on its usual day of each month of the window.
+
+    Args:
+        transactions: The transactions, amounts in milliunits.
+        charges: The monthly charges, from :func:`monthly`.
+        today: The day of the question; a charge already paid this month is not expected
+            again this month.
+        window: First and last day, included.
+
+    Returns:
+        Each charge with a day it is expected on, charge by charge, in date order.
+    """
+    this_month = today.isoformat()[:7]
+    paid = {
+        untrusted(_merchant(tx))
+        for tx in transactions
+        if forecast.usable(tx) and tx["date"][:7] == this_month and tx["date"] <= today.isoformat()
+    }
+    found = []
+    for charge in charges:
+        for year, month in _months(*window):
+            day = schedule.months_later(date(year, month, 1), 0, charge.day)
+            again = (year, month) == (today.year, today.month) and charge.payee in paid
+            if window[0] <= day <= window[1] and not again:
+                found.append((charge, day))
+    return found
+
+
 def _from_schedules(
     scheduled: list[dict[str, Any]],
     names: dict[str, str],
@@ -402,6 +482,49 @@ def _from_history(
             )
             for day in dates_of(pattern, *window)
         ]
+    return found
+
+
+def _from_monthly(
+    transactions: list[dict[str, Any]],
+    scheduled: list[dict[str, Any]],
+    names: dict[str, str],
+    window: tuple[date, date],
+) -> list[UpcomingExpense]:
+    """List the monthly charges of the history expected in the window, unless scheduled.
+
+    Args:
+        transactions: The plan's transactions, amounts in milliunits.
+        scheduled: The plan's scheduled transactions.
+        names: Category names by id.
+        window: First and last day, included; the first is today.
+
+    Returns:
+        The bills, on their usual day, each with the category its charges went to most.
+    """
+    today = window[0]
+    months = set(forecast.lookback(today))
+    charged: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for tx in transactions:
+        if forecast.usable(tx) and tx["amount"] < 0 and tx["date"][:7] in months:
+            charged[untrusted(_merchant(tx))].append(tx)
+    found = []
+    charges = monthly(transactions, planned_payees(scheduled), today)
+    for charge, day in monthly_dates(transactions, charges, today, window):
+        used = _category(charged[charge.payee])
+        known = used if used in names else None
+        found.append(
+            UpcomingExpense(
+                date=day.isoformat(),
+                payee=charge.payee,
+                amount=charge.amount,
+                source="recurring",
+                frequency="monthly",
+                category=names[known] if known else None,
+                category_id=known,
+                confidence=("high" if charge.months_seen >= forecast.LOOKBACK_MONTHS else "low"),
+            )
+        )
     return found
 
 
@@ -591,7 +714,7 @@ def _notes(include_monthly: bool, without_category: int) -> list[str]:
     """Write down how the bills were found and the readiness judged.
 
     Args:
-        include_monthly: True when monthly schedules were listed too.
+        include_monthly: True when the monthly schedules and charges were listed too.
         without_category: How many bills have no known category.
 
     Returns:
@@ -610,11 +733,21 @@ def _notes(include_monthly: bool, without_category: int) -> list[str]:
         "amount is projected. Confidence is high when seen 3 times or more, low when twice. "
         "A charge late by less than a month is expected today; later, it is taken as "
         "stopped. A payee a YNAB schedule covers is left to its schedule.",
+    ]
+    if include_monthly:
+        notes.append(
+            "recurring: a heuristic. A payee charged in 3 of the last 4 full months at about "
+            "the same amount (within 20 % of the median), expected on its usual day of each "
+            "month at its median amount, and not again in a month it was already paid. "
+            "Confidence is high when seen in all 4 months, low in 3. A payee a YNAB schedule "
+            "covers is left to its schedule."
+        )
+    notes.append(
         "on_track: what the category holds today, plus what its target is expected to add "
         "by each bill (spread as YNAB spreads a target by a date, or at its rhythm), covers "
         "everything due by then. A category that also pays monthly spending from the same "
-        "money is less ready than shown.",
-    ]
+        "money is less ready than shown."
+    )
     if without_category:
         notes.append(
             f"{without_category} of the bills have no category, or one not in the plan: listed, "
@@ -630,9 +763,10 @@ def summary(  # pylint: disable=too-many-arguments
     today: date,
     *,
     horizon_months: int = 12,
+    horizon_days: int | None = None,
     include_monthly: bool = False,
 ) -> UpcomingExpenses:
-    """List the irregular bills ahead, month by month, and judge their categories.
+    """List the bills ahead, month by month, and judge their categories.
 
     Args:
         transactions: The plan's transactions, amounts in milliunits.
@@ -640,22 +774,29 @@ def summary(  # pylint: disable=too-many-arguments
         month: The current month as client.get_month returns it, with its categories.
         today: The day of the question, the first day looked at.
         horizon_months: How many months ahead to look.
-        include_monthly: True to list the monthly and more frequent schedules too.
+        horizon_days: How many days ahead to look, replacing horizon_months; None to
+            count in months.
+        include_monthly: True to list the monthly and more frequent schedules too, and
+            the charges of the history that recur every month.
 
     Returns:
         The bills, their total, and whether each category will be ready.
     """
-    until = schedule.months_later(today, horizon_months, today.day)
+    window = (
+        today,
+        schedule.months_later(today, horizon_months, today.day)
+        if horizon_days is None
+        else today + timedelta(days=horizon_days),
+    )
     categories = {c["id"]: c for c in month.get("categories", []) if not c.get("deleted")}
     names = {cat_id: untrusted(c["name"]) for cat_id, c in categories.items()}
-    window = (today, until)
-    expenses = sorted(
-        _from_schedules(scheduled, names, window, include_monthly)
-        + _from_history(transactions, scheduled, names, window),
-        key=lambda e: (e.date, e.payee),
-    )
+    expenses = _from_schedules(scheduled, names, window, include_monthly)
+    expenses += _from_history(transactions, scheduled, names, window)
+    if include_monthly:
+        expenses += _from_monthly(transactions, scheduled, names, window)
+    expenses.sort(key=lambda e: (e.date, e.payee))
     ready = _categories(expenses, categories, today)
-    since, last = today.isoformat(), until.isoformat()
+    since, last = today.isoformat(), window[1].isoformat()
     grouped = [(label, list(group)) for label, group in groupby(expenses, key=lambda e: e.date[:7])]
     return UpcomingExpenses(
         message=_message(expenses, ready, since, last),

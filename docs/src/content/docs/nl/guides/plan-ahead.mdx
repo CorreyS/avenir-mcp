@@ -14,6 +14,7 @@ import debtPayoff from '@snippets/nl/debt_payoff.json?raw';
 import pace from '@snippets/nl/category_pace.json?raw';
 import goal from '@snippets/nl/goal_projection.json?raw';
 import upcomingExpenses from '@snippets/nl/upcoming_expenses.json?raw';
+import upcomingBills from '@snippets/nl/upcoming_bills.json?raw';
 import paycheckPlan from '@snippets/nl/paycheck_plan.json?raw';
 import scenarios from '@snippets/nl/scenarios.json?raw';
 
@@ -200,6 +201,16 @@ gezet, en het doel van de tennisclub spreidt de 400,00 die nog ontbreken over de
 tot de contributie, die in december vervalt.
 
 <Code code={upcomingExpenses} lang="json" title="get_upcoming_expenses" />
+
+Vraag *„welke rekeningen vervallen de komende twee weken?“*: `horizon_days=14` telt de
+periode in dagen vanaf vandaag in plaats van in maanden (1 tot 366), en `include_monthly=True`
+voegt de maandelijkse rekeningen toe: elke maandelijkse planning, zoals de huur, en de
+uitgaven die in 3 van de laatste 4 volle maanden voorkwamen en die geen planning dekt
+(`recurring`: telefoon, energie, streaming), op hun gebruikelijke dag en niet nog eens in een
+maand waarin ze al betaald zijn. Elke rekening heeft haar datum, in datumvolgorde, per maand
+gegroepeerd.
+
+<Code code={upcomingBills} lang="json" title="get_upcoming_expenses (horizon_days=14)" />
 
 ## Vóór het volgende salaris
 

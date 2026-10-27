@@ -110,6 +110,34 @@ def test_the_schema_states_the_range_of_the_horizon() -> None:
     assert (prop["minimum"], prop["maximum"], prop["default"]) == (1, 24, 12)
 
 
+def test_the_next_two_weeks(ynab: dict[str, AsyncMock]) -> None:
+    """horizon_days counts days from today and replaces horizon_months."""
+    args = {"plan_id": "b1", "horizon_days": 14, "horizon_months": 6, "include_monthly": True}
+    answer = call("get_upcoming_expenses", args).structured_content
+    assert (answer["since"], answer["until"]) == ("2026-09-25", "2026-10-09")
+    assert answer["months"] == []
+    assert all(mock.await_count == 1 for mock in ynab.values())
+
+
+@pytest.mark.parametrize("days", [0, 367])
+def test_a_horizon_in_days_out_of_range_is_refused_before_any_request(
+    ynab: dict[str, AsyncMock], days: int
+) -> None:
+    """1 to 366 days: anything else is refused before YNAB is asked anything."""
+    assert call("get_upcoming_expenses", {"plan_id": "b1", "horizon_days": days}).is_error
+    assert all(mock.await_count == 0 for mock in ynab.values())
+
+
+def test_the_schema_states_the_range_of_the_horizon_in_days() -> None:
+    """The agent sees 1 to 366 days, none by default, and when to ask for two weeks."""
+    schema = tool_schema("get_upcoming_expenses")
+    prop = schema["properties"]["horizon_days"]
+    days = next(choice for choice in prop["anyOf"] if choice["type"] == "integer")
+    assert (days["minimum"], days["maximum"], prop["default"]) == (1, 366, None)
+    description = _tools(enable_writes=False)["get_upcoming_expenses"].description
+    assert "horizon_days=14, include_monthly=True" in description
+
+
 def test_the_description_names_the_write_tools_only_when_they_exist() -> None:
     """Read-only, it points to YNAB itself; with writes, to move_money and set_category_target."""
     read_only = _tools(enable_writes=False)["get_upcoming_expenses"].description

@@ -14,6 +14,7 @@ import debtPayoff from '@snippets/de/debt_payoff.json?raw';
 import pace from '@snippets/de/category_pace.json?raw';
 import goal from '@snippets/de/goal_projection.json?raw';
 import upcomingExpenses from '@snippets/de/upcoming_expenses.json?raw';
+import upcomingBills from '@snippets/de/upcoming_bills.json?raw';
 import paycheckPlan from '@snippets/de/paycheck_plan.json?raw';
 import scenarios from '@snippets/de/scenarios.json?raw';
 
@@ -205,6 +206,16 @@ Hausratversicherung schon zurückgelegt, und das Ziel des Tennisclubs verteilt d
 fehlenden 400,00 auf die Monate bis zum Mitgliedsbeitrag, fällig im Dezember.
 
 <Code code={upcomingExpenses} lang="json" title="get_upcoming_expenses" />
+
+Fragen Sie *„Welche Rechnungen sind in den nächsten zwei Wochen fällig?“*: `horizon_days=14`
+zählt den Zeitraum in Tagen ab heute statt in Monaten (1 bis 366), und `include_monthly=True`
+nimmt die monatlichen Rechnungen hinzu: jede monatliche Planung wie die Miete und die
+Ausgaben, die in 3 der letzten 4 vollen Monate vorkamen und keine Planung abdeckt
+(`recurring`: Telefon, Energie, Streaming), an ihrem üblichen Tag und nicht noch einmal in
+einem Monat, in dem sie schon bezahlt wurden. Jede Rechnung hat ihr Datum, in Datumsfolge,
+nach Monat gruppiert.
+
+<Code code={upcomingBills} lang="json" title="get_upcoming_expenses (horizon_days=14)" />
 
 ## Vor dem nächsten Gehalt
 

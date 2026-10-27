@@ -1,0 +1,99 @@
+{
+  "message": "4 upcoming expenses, 1075.66 in all, between 2026-09-25 and 2026-10-09. 2 of 3 categories are short: Internet needs 15.00 more a month, Handy needs 10.00 more a month.",
+  "since": "2026-09-25",
+  "until": "2026-10-09",
+  "months": [
+    {
+      "month": "2026-10",
+      "total": -1075.66,
+      "expenses": [
+        {
+          "date": "2026-10-03",
+          "payee": "LANDLORD SARL",
+          "amount": -950.0,
+          "source": "scheduled",
+          "frequency": "monthly",
+          "category": "Miete",
+          "category_id": "cat-rent",
+          "confidence": null
+        },
+        {
+          "date": "2026-10-04",
+          "payee": "INTEREST",
+          "amount": -75.68,
+          "source": "recurring",
+          "frequency": "monthly",
+          "category": null,
+          "category_id": null,
+          "confidence": "high"
+        },
+        {
+          "date": "2026-10-06",
+          "payee": "FIBERNET - PRELEV",
+          "amount": -29.99,
+          "source": "scheduled",
+          "frequency": "monthly",
+          "category": "Internet",
+          "category_id": "cat-internet",
+          "confidence": null
+        },
+        {
+          "date": "2026-10-08",
+          "payee": "TELCO MOBILE - PRELEV",
+          "amount": -19.99,
+          "source": "scheduled",
+          "frequency": "monthly",
+          "category": "Handy",
+          "category_id": "cat-phone",
+          "confidence": null
+        }
+      ]
+    }
+  ],
+  "total": -1075.66,
+  "categories": [
+    {
+      "category_id": "cat-internet",
+      "name": "Internet",
+      "available": 0.0,
+      "target": "no target",
+      "due": 29.99,
+      "first_due": "2026-10-06",
+      "expected_funding": 0.0,
+      "on_track": false,
+      "shortfall": 29.99,
+      "extra_per_month": 15.0
+    },
+    {
+      "category_id": "cat-phone",
+      "name": "Handy",
+      "available": 0.0,
+      "target": "no target",
+      "due": 19.99,
+      "first_due": "2026-10-08",
+      "expected_funding": 0.0,
+      "on_track": false,
+      "shortfall": 19.99,
+      "extra_per_month": 10.0
+    },
+    {
+      "category_id": "cat-rent",
+      "name": "Miete",
+      "available": 0.0,
+      "target": "950.00 each month",
+      "due": 950.0,
+      "first_due": "2026-10-03",
+      "expected_funding": 950.0,
+      "on_track": true,
+      "shortfall": 0.0,
+      "extra_per_month": 0.0
+    }
+  ],
+  "notes": [
+    "scheduled: every scheduled transaction, money out only, transfers between accounts left out.",
+    "detected: a heuristic. A payee charged at a regular interval of 2, 3, 4, 6 or 12 months in the last 24 months, at about the same amount (within 20 %); the latest amount is projected. Confidence is high when seen 3 times or more, low when twice. A charge late by less than a month is expected today; later, it is taken as stopped. A payee a YNAB schedule covers is left to its schedule.",
+    "recurring: a heuristic. A payee charged in 3 of the last 4 full months at about the same amount (within 20 % of the median), expected on its usual day of each month at its median amount, and not again in a month it was already paid. Confidence is high when seen in all 4 months, low in 3. A payee a YNAB schedule covers is left to its schedule.",
+    "on_track: what the category holds today, plus what its target is expected to add by each bill (spread as YNAB spreads a target by a date, or at its rhythm), covers everything due by then. A category that also pays monthly spending from the same money is less ready than shown.",
+    "… 1 more"
+  ]
+}

@@ -187,6 +187,12 @@ CALLS: list[Call] = [
     # The yearly home insurance in October and the tennis club's membership in December,
     # each category on track for its bill.
     Call("upcoming_expenses", "get_upcoming_expenses", {"plan_id": BUDGET}),
+    # The next two weeks, monthly bills included: what is due, dated, in date order.
+    Call(
+        "upcoming_bills",
+        "get_upcoming_expenses",
+        {"plan_id": BUDGET, "horizon_days": 14, "include_monthly": True},
+    ),
     # The salary on the 28th, then the month after it: October's bills one by one.
     Call(
         "paycheck_plan",

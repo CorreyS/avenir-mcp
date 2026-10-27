@@ -14,6 +14,7 @@ import debtPayoff from '@snippets/es/debt_payoff.json?raw';
 import pace from '@snippets/es/category_pace.json?raw';
 import goal from '@snippets/es/goal_projection.json?raw';
 import upcomingExpenses from '@snippets/es/upcoming_expenses.json?raw';
+import upcomingBills from '@snippets/es/upcoming_bills.json?raw';
 import paycheckPlan from '@snippets/es/paycheck_plan.json?raw';
 import scenarios from '@snippets/es/scenarios.json?raw';
 
@@ -198,6 +199,15 @@ tiempo. Aquí el seguro del hogar ya está apartado, y el objetivo del club de t
 los 400,00 que aún faltan entre los meses que preceden a la cuota, que vence en diciembre.
 
 <Code code={upcomingExpenses} lang="json" title="get_upcoming_expenses" />
+
+Pregunte *«¿qué facturas vencen en las próximas dos semanas?»*: `horizon_days=14` cuenta el
+periodo en días desde hoy en lugar de en meses (de 1 a 366), e `include_monthly=True` añade
+las facturas mensuales: cada programación mensual, como el alquiler, y los gastos vistos en 3
+de los últimos 4 meses completos que ninguna programación cubre (`recurring`: teléfono,
+suministros, streaming), en su día habitual y no otra vez en un mes en que ya se pagaron.
+Cada factura lleva su fecha, en orden de fechas, agrupada por mes.
+
+<Code code={upcomingBills} lang="json" title="get_upcoming_expenses (horizon_days=14)" />
 
 ## Antes del próximo pago
 

@@ -438,3 +438,102 @@ def test_nothing_ahead_says_so() -> None:
     answer = _summary(history=[], schedules=[])
     assert answer.months == [] and answer.categories == [] and answer.total == 0.0
     assert answer.message == "No upcoming expense was found between 2026-09-25 and 2027-09-25."
+
+
+# ---------------------------------------------------------------------------
+# A window in days, and the monthly bills of the history
+# ---------------------------------------------------------------------------
+
+# Seen in 3 of the last 4 full months, on the 28th, and not yet this month.
+PHONE = _every("TELCO MOBILE", ["2026-06-28", "2026-07-28", "2026-08-28"], -25_000, "c-phone")
+# Paid on the 2nd every month, this month too: not expected again before October.
+POWER = _every("POWERGRID ENERGY", [f"2026-{m:02d}-02" for m in range(5, 10)], -64_200, "c-power")
+# The landlord's transfer, which the monthly schedule already projects.
+RENT_PAID = _every("LANDLORD", [f"2026-{m:02d}-03" for m in range(5, 10)], -950_000, "c-rent")
+# The salary, every month: money in, not a bill.
+SALARY = _every("ACME PAYROLL", [f"2026-{m:02d}-27" for m in range(5, 10)], 3_200_000)
+MONTHLY = STREAM + PHONE + POWER + RENT_PAID + SALARY
+BILLS = {
+    "categories": [
+        *EVERY["categories"],
+        _cat("c-phone", "Phone", 0),
+        _cat("c-power", "Electricity", 64_200),
+    ]
+}
+
+
+def _bills(**options: Any) -> list[tuple[str, str, float, str, str | None]]:
+    answer = _summary(history=MONTHLY, month=BILLS, include_monthly=True, **options)
+    return [
+        (e.date, e.payee, e.amount, e.source, e.category) for m in answer.months for e in m.expenses
+    ]
+
+
+def test_a_horizon_in_days_ends_that_many_days_after_today() -> None:
+    """Two weeks from 25 September is 9 October, whatever horizon_months says."""
+    answer = _summary(horizon_days=14)
+    assert (answer.since, answer.until) == ("2026-09-25", "2026-10-09")
+    assert _summary(horizon_days=14, horizon_months=6).until == "2026-10-09"
+    assert _summary(horizon_days=1).until == "2026-09-26"
+
+
+def test_the_monthly_bills_of_the_history_join_the_next_two_weeks() -> None:
+    """The phone not yet paid this month on the 28th, the rent by its schedule, then power."""
+    assert _bills(horizon_days=14) == [
+        ("2026-09-28", "TELCO MOBILE", -25.0, "recurring", "Phone"),
+        ("2026-10-02", "POWERGRID ENERGY", -64.2, "recurring", "Electricity"),
+        ("2026-10-03", "Landlord", -950.0, "scheduled", "Rent"),
+    ]
+
+
+def test_a_monthly_bill_comes_on_its_usual_day_of_every_month_ahead() -> None:
+    """Streaming on the 15th of October and November, paid this month already."""
+    streaming = [b for b in _bills(horizon_days=60) if b[1] == "STREAMFLIX"]
+    assert [b[0] for b in streaming] == ["2026-10-15", "2026-11-15"]
+    assert {b[3:] for b in streaming} == {("recurring", "Subscriptions")}
+
+
+def test_a_monthly_bill_is_detailed_like_the_others() -> None:
+    """Frequency monthly; confidence high when seen in each of the last 4 months, else low."""
+    answer = _summary(history=MONTHLY, month=BILLS, include_monthly=True, horizon_days=14)
+    found = {e.payee: e for m in answer.months for e in m.expenses}
+    phone, power = found["TELCO MOBILE"], found["POWERGRID ENERGY"]
+    assert (phone.frequency, phone.category_id, phone.confidence) == ("monthly", "c-phone", "low")
+    assert (power.frequency, power.category_id, power.confidence) == ("monthly", "c-power", "high")
+    assert any(note.startswith("recurring:") for note in answer.notes)
+
+
+def test_a_monthly_bill_is_counted_once_and_money_in_is_not_a_bill() -> None:
+    """The landlord's schedule covers its transfers; the salary is income."""
+    payees = [b[1] for b in _bills(horizon_months=3)]
+    assert payees.count("Landlord") == 3
+    assert "LANDLORD" not in payees
+    assert "ACME PAYROLL" not in payees
+
+
+def test_monthly_bills_of_the_history_join_only_when_asked_for() -> None:
+    """Without include_monthly, the irregular bills alone, as before."""
+    answer = _summary(history=MONTHLY, month=BILLS, horizon_days=60)
+    assert all(e.source != "recurring" for m in answer.months for e in m.expenses)
+    assert not any(note.startswith("recurring:") for note in answer.notes)
+
+
+def test_a_monthly_bill_without_a_known_category_is_listed_but_not_judged() -> None:
+    """The phone's category is not in the plan's month: listed, with no category."""
+    answer = _summary(history=PHONE, include_monthly=True, horizon_days=14, schedules=[])
+    [phone] = [e for m in answer.months for e in m.expenses]
+    assert (phone.payee, phone.category, phone.category_id) == ("TELCO MOBILE", None, None)
+    assert answer.categories == []
+
+
+def test_every_bill_is_dated_and_listed_earliest_first() -> None:
+    """Across every source, month after month, the dates only go forward."""
+    answer = _summary(history=MONTHLY + WATER + CLOUD, month=BILLS, include_monthly=True)
+    dates = [e.date for m in answer.months for e in m.expenses]
+    assert dates == sorted(dates)
+    assert {e.source for m in answer.months for e in m.expenses} == {
+        "scheduled",
+        "recurring",
+        "detected",
+    }
+    assert all(e.date[:7] == m.month for m in answer.months for e in m.expenses)

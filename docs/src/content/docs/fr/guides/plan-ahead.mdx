@@ -14,6 +14,7 @@ import debtPayoff from '@snippets/fr/debt_payoff.json?raw';
 import pace from '@snippets/fr/category_pace.json?raw';
 import goal from '@snippets/fr/goal_projection.json?raw';
 import upcomingExpenses from '@snippets/fr/upcoming_expenses.json?raw';
+import upcomingBills from '@snippets/fr/upcoming_bills.json?raw';
 import paycheckPlan from '@snippets/fr/paycheck_plan.json?raw';
 import scenarios from '@snippets/fr/scenarios.json?raw';
 
@@ -203,6 +204,16 @@ côté, et l'objectif du club de tennis étale les 400,00 qui manquent encore su
 qui précèdent la cotisation, due en décembre.
 
 <Code code={upcomingExpenses} lang="json" title="get_upcoming_expenses" />
+
+Demandez *« quelles factures tombent dans les deux prochaines semaines ? »* : `horizon_days=14`
+compte la période en jours à partir d'aujourd'hui plutôt qu'en mois (de 1 à 366), et
+`include_monthly=True` ajoute les factures mensuelles : chaque planification mensuelle, comme
+le loyer, et les dépenses vues sur 3 des 4 derniers mois complets qu'aucune planification ne
+couvre (`recurring` : téléphone, énergie, streaming), à leur jour habituel et pas une seconde
+fois un mois où elles sont déjà payées. Chaque facture est datée, dans l'ordre des dates,
+regroupée par mois.
+
+<Code code={upcomingBills} lang="json" title="get_upcoming_expenses (horizon_days=14)" />
 
 ## Avant la prochaine paie
 

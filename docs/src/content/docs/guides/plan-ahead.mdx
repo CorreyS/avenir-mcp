@@ -14,6 +14,7 @@ import debtPayoff from '@snippets/debt_payoff.json?raw';
 import pace from '@snippets/category_pace.json?raw';
 import goal from '@snippets/goal_projection.json?raw';
 import upcomingExpenses from '@snippets/upcoming_expenses.json?raw';
+import upcomingBills from '@snippets/upcoming_bills.json?raw';
 import paycheckPlan from '@snippets/paycheck_plan.json?raw';
 import scenarios from '@snippets/scenarios.json?raw';
 
@@ -197,6 +198,15 @@ tennis club's target spreads the 400.00 still missing over the months up to its
 membership, due in December.
 
 <Code code={upcomingExpenses} lang="json" title="get_upcoming_expenses" />
+
+Ask *"what bills are due in the next two weeks?"*: `horizon_days=14` counts the window in
+days from today instead of months (1 to 366), and `include_monthly=True` adds the monthly
+bills: every monthly schedule, such as the rent, and the charges seen in 3 of the last 4
+full months that no schedule covers (`recurring`: phone, utilities, streaming), on their
+usual day and not again in a month they were already paid. Each bill is dated, in date
+order, grouped by month.
+
+<Code code={upcomingBills} lang="json" title="get_upcoming_expenses (horizon_days=14)" />
 
 ## Before the next paycheck
 
